@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Response } from 'express';
 import Review from '../models/Review';
 import Product from '../models/Product';
 import Order from '../models/Order';
@@ -64,7 +64,7 @@ router.get('/product/:productId', async (req, res) => {
 });
 
 // Create review
-router.post('/', authenticate, async (req: AuthRequest, res) => {
+router.post('/', authenticate, async (req: AuthRequest, res: Response) => {
   try {
     const { product, rating, title, comment, images } = req.body;
 
@@ -132,7 +132,7 @@ router.post('/', authenticate, async (req: AuthRequest, res) => {
 });
 
 // Update review
-router.put('/:id', authenticate, async (req: AuthRequest, res) => {
+router.put('/:id', authenticate, async (req: AuthRequest, res: Response) => {
   try {
     const { rating, title, comment, images } = req.body;
 
@@ -173,7 +173,7 @@ router.put('/:id', authenticate, async (req: AuthRequest, res) => {
 });
 
 // Delete review
-router.delete('/:id', authenticate, async (req: AuthRequest, res) => {
+router.delete('/:id', authenticate, async (req: AuthRequest, res: Response) => {
   try {
     const review = await Review.findById(req.params.id);
 
@@ -203,7 +203,7 @@ router.delete('/:id', authenticate, async (req: AuthRequest, res) => {
 });
 
 // Mark review as helpful
-router.post('/:id/helpful', authenticate, async (req: AuthRequest, res) => {
+router.post('/:id/helpful', authenticate, async (req: AuthRequest, res: Response) => {
   try {
     const review = await Review.findByIdAndUpdate(
       req.params.id,
@@ -229,7 +229,7 @@ router.post('/:id/helpful', authenticate, async (req: AuthRequest, res) => {
 });
 
 // Get all reviews (Admin only)
-router.get('/', authenticate, isAdmin, async (req: AuthRequest, res) => {
+router.get('/', authenticate, isAdmin, async (req: AuthRequest, res: Response) => {
   try {
     const { status, page = '1', limit = '20' } = req.query;
 
@@ -271,7 +271,7 @@ router.get('/', authenticate, isAdmin, async (req: AuthRequest, res) => {
 });
 
 // Approve review (Admin only)
-router.patch('/:id/approve', authenticate, isAdmin, async (req: AuthRequest, res) => {
+router.patch('/:id/approve', authenticate, isAdmin, async (req: AuthRequest, res: Response) => {
   try {
     const review = await Review.findByIdAndUpdate(
       req.params.id,
@@ -300,7 +300,7 @@ router.patch('/:id/approve', authenticate, isAdmin, async (req: AuthRequest, res
 });
 
 // Reject review (Admin only)
-router.patch('/:id/reject', authenticate, isAdmin, async (req: AuthRequest, res) => {
+router.patch('/:id/reject', authenticate, isAdmin, async (req: AuthRequest, res: Response) => {
   try {
     const review = await Review.findByIdAndUpdate(
       req.params.id,
