@@ -1,0 +1,322 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* AquaPure Water Purifier Design System - Premium E-commerce UI
+All colors MUST be HSL for consistent theming.
+Water-themed design with blues, whites, and refreshing gradients.
+*/
+
+@layer base {
+  :root {
+    /* Base Colors - Pure & Clean */
+    --background: 210 50% 98%;
+    --foreground: 217 32% 17%;
+
+    /* Card & Surface Colors */
+    --card: 0 0% 100%;
+    --card-foreground: 217 32% 17%;
+
+    /* Popover Colors */
+    --popover: 0 0% 100%;
+    --popover-foreground: 217 32% 17%;
+
+    /* Primary - Ocean Blue Theme */
+    --primary: 199 89% 48%;
+    --primary-foreground: 0 0% 100%;
+    --primary-light: 199 89% 65%;
+    --primary-dark: 199 89% 35%;
+
+    /* Secondary - Sky Blue */
+    --secondary: 213 94% 68%;
+    --secondary-foreground: 0 0% 100%;
+
+    /* Muted - Soft Grays */
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+
+    /* Accent - Refreshing Cyan */
+    --accent: 187 85% 53%;
+    --accent-foreground: 0 0% 100%;
+
+    /* Status Colors */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+
+    /* Border & Input */
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 199 89% 48%;
+
+    /* Design System Radius */
+    --radius: 0.75rem;
+
+    /* Water Theme Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(199 89% 48%), hsl(213 94% 68%));
+    --gradient-surface: linear-gradient(180deg, hsl(0 0% 100%), hsl(210 50% 98%));
+    --gradient-hero: linear-gradient(135deg, hsl(199 89% 48%) 0%, hsl(213 94% 68%) 50%, hsl(187 85% 53%) 100%);
+    
+    /* Premium Shadows */
+    --shadow-soft: 0 2px 20px -4px hsl(199 89% 48% / 0.1);
+    --shadow-premium: 0 8px 40px -8px hsl(199 89% 48% / 0.25);
+    --shadow-floating: 0 16px 60px -12px hsl(199 89% 48% / 0.3);
+
+    /* Water Pattern Opacity */
+    --pattern-opacity: 0.03;
+    --pattern-accent-opacity: 0.08;
+
+    /* Glass Morphism */
+    --glass-bg: hsl(0 0% 100% / 0.8);
+    --glass-border: hsl(199 89% 48% / 0.1);
+
+    /* Sidebar (keeping existing) */
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 199 89% 48%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 199 89% 48%;
+  }
+
+  .dark {
+    --background: 217 32% 12%;
+    --foreground: 210 40% 95%;
+
+    --card: 217 32% 15%;
+    --card-foreground: 210 40% 95%;
+
+    --popover: 217 32% 15%;
+    --popover-foreground: 210 40% 95%;
+
+    --primary: 199 89% 55%;
+    --primary-foreground: 217 32% 12%;
+    --primary-light: 199 89% 70%;
+    --primary-dark: 199 89% 40%;
+
+    --secondary: 213 94% 75%;
+    --secondary-foreground: 217 32% 12%;
+
+    --muted: 217 32% 18%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 187 85% 60%;
+    --accent-foreground: 217 32% 12%;
+
+    --destructive: 0 84% 65%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 217 32% 25%;
+    --input: 217 32% 25%;
+    --ring: 199 89% 55%;
+
+    --glass-bg: hsl(217 32% 15% / 0.8);
+    --glass-border: hsl(199 89% 55% / 0.2);
+
+    --pattern-opacity: 0.05;
+    --pattern-accent-opacity: 0.1;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans;
+  }
+
+  /* Floating Water Elements Background */
+  .floating-water-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+
+  .floating-water-bg::before,
+  .floating-water-bg::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, hsl(var(--primary) / 0.08), hsl(var(--primary) / 0.02));
+    animation: float-random 8s ease-in-out infinite;
+  }
+
+  .floating-water-bg::before {
+    width: 120px;
+    height: 120px;
+    top: 15%;
+    left: 85%;
+    animation-delay: -2s;
+  }
+
+  .floating-water-bg::after {
+    width: 80px;
+    height: 80px;
+    top: 70%;
+    left: 10%;
+    animation-delay: -4s;
+  }
+
+  .water-droplet {
+    position: absolute;
+    border-radius: 50% 50% 50% 0;
+    background: radial-gradient(circle at 30% 30%, hsl(var(--accent) / 0.15), hsl(var(--accent) / 0.05));
+    transform: rotate(-45deg);
+    animation: float-droplet 6s ease-in-out infinite;
+  }
+
+  .water-droplet:nth-child(1) {
+    width: 25px;
+    height: 25px;
+    top: 20%;
+    left: 15%;
+    animation-delay: -1s;
+  }
+
+  .water-droplet:nth-child(2) {
+    width: 35px;
+    height: 35px;
+    top: 45%;
+    left: 75%;
+    animation-delay: -3s;
+  }
+
+  .water-droplet:nth-child(3) {
+    width: 18px;
+    height: 18px;
+    top: 65%;
+    left: 20%;
+    animation-delay: -5s;
+  }
+
+  .water-droplet:nth-child(4) {
+    width: 28px;
+    height: 28px;
+    top: 30%;
+    left: 60%;
+    animation-delay: -2.5s;
+  }
+
+  .water-droplet:nth-child(5) {
+    width: 22px;
+    height: 22px;
+    top: 80%;
+    left: 85%;
+    animation-delay: -4.5s;
+  }
+
+  .water-bubble {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle at 25% 25%, hsl(var(--secondary) / 0.12), hsl(var(--secondary) / 0.04));
+    border: 1px solid hsl(var(--primary) / 0.08);
+    animation: float-bubble 10s ease-in-out infinite;
+  }
+
+  .water-bubble:nth-child(6) {
+    width: 40px;
+    height: 40px;
+    top: 10%;
+    left: 40%;
+    animation-delay: -1.5s;
+  }
+
+  .water-bubble:nth-child(7) {
+    width: 55px;
+    height: 55px;
+    top: 55%;
+    left: 50%;
+    animation-delay: -3.5s;
+  }
+
+  .water-bubble:nth-child(8) {
+    width: 30px;
+    height: 30px;
+    top: 75%;
+    left: 65%;
+    animation-delay: -6s;
+  }
+
+  @keyframes float-random {
+    0%, 100% { 
+      transform: translate(0, 0) scale(1);
+      opacity: 0.6;
+    }
+    25% { 
+      transform: translate(-15px, -20px) scale(1.1);
+      opacity: 0.8;
+    }
+    50% { 
+      transform: translate(20px, -30px) scale(0.9);
+      opacity: 0.4;
+    }
+    75% { 
+      transform: translate(-10px, -15px) scale(1.05);
+      opacity: 0.7;
+    }
+  }
+
+  @keyframes float-droplet {
+    0%, 100% { 
+      transform: rotate(-45deg) translate(0, 0);
+      opacity: 0.7;
+    }
+    33% { 
+      transform: rotate(-45deg) translate(10px, -15px);
+      opacity: 0.9;
+    }
+    66% { 
+      transform: rotate(-45deg) translate(-8px, -25px);
+      opacity: 0.5;
+    }
+  }
+
+  @keyframes float-bubble {
+    0%, 100% { 
+      transform: translate(0, 0) scale(1);
+      opacity: 0.5;
+    }
+    20% { 
+      transform: translate(15px, -10px) scale(1.1);
+      opacity: 0.7;
+    }
+    40% { 
+      transform: translate(-10px, -25px) scale(0.95);
+      opacity: 0.3;
+    }
+    60% { 
+      transform: translate(20px, -35px) scale(1.05);
+      opacity: 0.6;
+    }
+    80% { 
+      transform: translate(-5px, -15px) scale(0.9);
+      opacity: 0.4;
+    }
+  }
+
+  /* Glass morphism utilities */
+  .glass-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  /* Gradient text utilities */
+  .gradient-text {
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+}
