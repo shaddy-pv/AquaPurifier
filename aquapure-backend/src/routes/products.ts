@@ -44,9 +44,11 @@ router.get('/', optionalAuth, async (req: AuthRequest, res) => {
     let sortOption: any = {};
     switch (sort) {
       case 'price-asc':
+      case 'price-low-high':
         sortOption = { price: 1 };
         break;
       case 'price-desc':
+      case 'price-high-low':
         sortOption = { price: -1 };
         break;
       case 'rating':
@@ -55,13 +57,16 @@ router.get('/', optionalAuth, async (req: AuthRequest, res) => {
       case 'name':
         sortOption = { name: 1 };
         break;
+      case 'popularity':
+        sortOption = { reviewCount: -1 };
+        break;
       default:
         sortOption = { createdAt: -1 };
     }
 
     // Pagination
-    const pageNum = parseInt(page as string);
-    const limitNum = parseInt(limit as string);
+    const pageNum = parseInt(page as string) || 1;
+    const limitNum = parseInt(limit as string) || 12;
     const skip = (pageNum - 1) * limitNum;
 
     const [products, total] = await Promise.all([
@@ -90,14 +95,23 @@ router.get('/', optionalAuth, async (req: AuthRequest, res) => {
   }
 });
 
-// Get single product by slug
-router.get('/:slug', async (req, res) => {
+// Get single product by slug OR ID
+router.get('/:identifier', async (req, res) => {
   try {
-    const product = await Product.findOne({ 
-      slug: req.params.slug,
+    const identifier = req.params.identifier;
+    
+    let product = await Product.findOne({ 
+      slug: identifier,
       isActive: true 
     });
     
+    if (!product && identifier.match(/^[0-9a-fA-F]{24}$/)) {
+      product = await Product.findOne({
+        _id: identifier,
+        isActive: true
+      });
+    }
+
     if (!product) {
       return res.status(404).json({ message: 'Product not found' });
     }
@@ -115,7 +129,26 @@ router.get('/:slug', async (req, res) => {
 // Create product (Admin only)
 router.post('/', authenticate, isAdmin, async (req: AuthRequest, res) => {
   try {
-    const product = await Product.create(req.body);
+    const { name, price, description, category, stock, images, features, originalPrice, specifications } = req.body;
+
+    if (!name || !price || !description || !category) {
+      return res.status(400).json({ message: 'Name, price, description, and category are required' });
+    }
+
+    const slug = req.body.slug || name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
+    const product = await Product.create({
+      name,
+      slug,
+      description,
+      price: Number(price),
+      originalPrice: originalPrice ? Number(originalPrice) : undefined,
+      category,
+      stock: Number(stock) || 0,
+      images: Array.isArray(images) ? images : (images ? [images] : []),
+      features: Array.isArray(features) ? features : [],
+      specifications: specifications || new Map()
+    });
     
     res.status(201).json({
       message: 'Product created successfully',
@@ -192,7 +225,7 @@ router.patch('/:id/stock', authenticate, isAdmin, async (req: AuthRequest, res) 
 
     const product = await Product.findByIdAndUpdate(
       req.params.id,
-      { stock },
+      { stock: Number(stock) },
       { new: true }
     );
 

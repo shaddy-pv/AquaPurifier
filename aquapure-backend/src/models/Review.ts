@@ -62,7 +62,16 @@ const reviewSchema = new Schema<IReview>({
     default: 'pending' 
   }
 }, { 
-  timestamps: true 
+  timestamps: true,
+  toJSON: {
+    virtuals: true,
+    transform: (_doc: any, ret: any) => {
+      ret.id = ret._id?.toString();
+      delete ret.__v;
+      return ret;
+    }
+  },
+  toObject: { virtuals: true }
 });
 
 // Index for faster queries

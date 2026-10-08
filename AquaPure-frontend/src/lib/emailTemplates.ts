@@ -60,8 +60,8 @@ export const orderConfirmationEmail = (data: OrderEmailData): string => {
     </div>
     
     <div class="footer">
-      <p>AquaPure - Pure Water, Pure Health</p>
-      <p>Contact: 1800-123-AQUA | support@aquapure.com</p>
+      <p>PRAYAG RO - शुद्ध जल • स्वस्थ जीवन</p>
+      <p>Contact: +91 9140967681 | support@prayagro.com</p>
     </div>
   </div>
 </body>
@@ -139,7 +139,7 @@ export const deliveryConfirmationEmail = (orderNumber: string, customerName: str
       <p>We hope you're enjoying your new water purifier!</p>
       <p>Please take a moment to rate your experience and leave a review.</p>
       
-      <p>Need help? Contact our support team at 1800-123-AQUA</p>
+      <p>Need help? Contact our support team at +91 9140967681 or support@prayagro.com</p>
     </div>
   </div>
 </body>

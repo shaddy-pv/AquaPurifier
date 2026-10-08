@@ -46,26 +46,30 @@ const Contact = () => {
     {
       icon: <Phone className="h-6 w-6 text-primary" />,
       title: "Call Us",
-      details: ["1800-123-AQUA (Toll Free)", "+91 22 1234 5678"],
-      action: "Call Now"
+      details: ["+91 9140967681 (Direct Helpline)", "9140967681 (Doorstep Service Desk)"],
+      action: "Call Now",
+      href: "tel:+919140967681"
     },
     {
       icon: <Mail className="h-6 w-6 text-primary" />,
       title: "Email Us",
-      details: ["support@aquapure.com", "sales@aquapure.com"],
-      action: "Send Email"
+      details: ["support@prayagro.com", "sales@prayagro.com"],
+      action: "Send Email",
+      href: "mailto:support@prayagro.com"
     },
     {
       icon: <MapPin className="h-6 w-6 text-primary" />,
       title: "Visit Us",
-      details: ["AquaPure Head Office", "Mumbai, Maharashtra, India"],
-      action: "Get Directions"
+      details: ["PRAYAG RO Store & Service Center", "31/3B Rajrooppur, Prayagraj, Uttar Pradesh - 211011, India"],
+      action: "View Location",
+      href: "https://maps.google.com/?q=31/3B+Rajrooppur+Prayagraj"
     },
     {
       icon: <Clock className="h-6 w-6 text-primary" />,
       title: "Working Hours",
-      details: ["Mon - Sat: 9:00 AM - 7:00 PM", "Sunday: 10:00 AM - 5:00 PM"],
-      action: null
+      details: ["Mon - Sat: 9:00 AM - 8:00 PM", "Sunday: 10:00 AM - 5:00 PM"],
+      action: null,
+      href: null
     }
   ];
 
@@ -81,7 +85,7 @@ const Contact = () => {
             </span>
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Have questions? We're here to help. Reach out to us through any of the channels below.
+            Have questions or need doorstep RO service in Prayagraj? Reach out to us through any channel below.
           </p>
         </div>
 
@@ -105,13 +109,15 @@ const Contact = () => {
                           {detail}
                         </p>
                       ))}
-                      {info.action && (
-                        <Button 
-                          variant="link" 
-                          className="px-0 mt-2 text-primary"
+                      {info.action && info.href && (
+                        <a 
+                          href={info.href} 
+                          target={info.href.startsWith("http") ? "_blank" : undefined}
+                          rel={info.href.startsWith("http") ? "noreferrer" : undefined}
+                          className="inline-block mt-2 text-xs font-bold text-sky-600 hover:text-sky-700 hover:underline"
                         >
                           {info.action} →
-                        </Button>
+                        </a>
                       )}
                     </div>
                   </div>
@@ -123,16 +129,19 @@ const Contact = () => {
             <Card className="border-0 shadow-soft bg-gradient-hero text-white">
               <CardContent className="p-6 text-center">
                 <Headphones className="h-12 w-12 mx-auto mb-4" />
-                <h3 className="font-semibold text-lg mb-2">24/7 Support</h3>
+                <h3 className="font-semibold text-lg mb-2">WhatsApp & Phone Support</h3>
                 <p className="text-sm opacity-90 mb-4">
-                  Need immediate assistance? Our support team is available round the clock.
+                  Need immediate RO assistance in Prayagraj? Connect with our team directly.
                 </p>
                 <Button 
                   variant="secondary"
-                  className="w-full bg-white text-primary hover:bg-white/90"
+                  className="w-full bg-white text-primary hover:bg-white/90 font-bold"
+                  asChild
                 >
-                  <MessageSquare className="h-4 w-4 mr-2" />
-                  Start Live Chat
+                  <a href="https://wa.me/919140967681" target="_blank" rel="noreferrer">
+                    <MessageSquare className="h-4 w-4 mr-2" />
+                    Chat on WhatsApp (+91 9140967681)
+                  </a>
                 </Button>
               </CardContent>
             </Card>

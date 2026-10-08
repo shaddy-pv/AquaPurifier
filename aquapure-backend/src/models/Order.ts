@@ -51,8 +51,8 @@ const orderSchema = new Schema<IOrder>({
   items: [{
     product: { 
       type: Schema.Types.ObjectId, 
-      ref: 'Product',
-      required: true
+      ref: 'Product', 
+      required: true 
     },
     name: { type: String, required: true },
     price: { type: Number, required: true },
@@ -83,38 +83,47 @@ const orderSchema = new Schema<IOrder>({
   razorpaySignature: String,
   subtotal: { 
     type: Number, 
-    required: true,
-    min: 0
+    required: true, 
+    min: 0 
   },
   tax: { 
     type: Number, 
     default: 0,
-    min: 0
+    min: 0 
   },
   shipping: { 
     type: Number, 
     default: 0,
-    min: 0
+    min: 0 
   },
   discount: { 
     type: Number, 
     default: 0,
-    min: 0
+    min: 0 
   },
   total: { 
     type: Number, 
-    required: true,
-    min: 0
+    required: true, 
+    min: 0 
   },
   status: { 
     type: String, 
     enum: ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'],
-    default: 'pending'
+    default: 'pending' 
   },
   trackingNumber: String,
   notes: String
 }, { 
-  timestamps: true 
+  timestamps: true,
+  toJSON: {
+    virtuals: true,
+    transform: (_doc: any, ret: any) => {
+      ret.id = ret._id?.toString();
+      delete ret.__v;
+      return ret;
+    }
+  },
+  toObject: { virtuals: true }
 });
 
 // Index for faster queries

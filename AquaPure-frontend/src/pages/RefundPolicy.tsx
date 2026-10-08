@@ -5,7 +5,7 @@ const RefundPolicy = () => {
     <div className="min-h-screen py-12">
       <SEO
         title="Refund & Return Policy"
-        description="Learn about AquaPure's refund and return policy for water purifiers and services."
+        description="Learn about PRAYAG RO's 7-day hassle-free replacement and warranty policy."
       />
 
       <div className="container mx-auto px-4">
@@ -84,11 +84,11 @@ const RefundPolicy = () => {
             <p>
               For returns and refunds, contact:
               <br />
-              Email: returns@aquapure.com
+              Email: returns@prayagro.com
               <br />
-              Phone: 1800-123-AQUA
+              Phone: +91 9140967681
               <br />
-              Hours: Mon-Sat, 9 AM - 7 PM
+              Hours: Mon-Sat, 9 AM - 9 PM
             </p>
           </section>
         </div>

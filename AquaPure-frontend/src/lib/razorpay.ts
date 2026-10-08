@@ -1,7 +1,7 @@
-declare global {
-  interface Window {
-    Razorpay: any;
-  }
+export interface RazorpayResponse {
+  razorpay_payment_id: string;
+  razorpay_order_id?: string;
+  razorpay_signature?: string;
 }
 
 export interface RazorpayOptions {
@@ -22,10 +22,10 @@ export interface RazorpayOptions {
   handler: (response: RazorpayResponse) => void;
 }
 
-export interface RazorpayResponse {
-  razorpay_payment_id: string;
-  razorpay_order_id?: string;
-  razorpay_signature?: string;
+declare global {
+  interface Window {
+    Razorpay: new (options: RazorpayOptions) => { open: () => void };
+  }
 }
 
 export const loadRazorpayScript = (): Promise<boolean> => {
@@ -54,5 +54,5 @@ export const initiateRazorpayPayment = async (options: RazorpayOptions) => {
   razorpay.open();
 };
 
-// Test key - Replace with your actual Razorpay key
-export const RAZORPAY_KEY = "rzp_test_1234567890";
+// Configurable key
+export const RAZORPAY_KEY = import.meta.env.VITE_RAZORPAY_KEY || "rzp_test_1234567890";

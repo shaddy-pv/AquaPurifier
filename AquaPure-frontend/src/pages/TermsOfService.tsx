@@ -5,7 +5,7 @@ const TermsOfService = () => {
     <div className="min-h-screen py-12">
       <SEO
         title="Terms of Service"
-        description="Read the terms and conditions for using AquaPure services and purchasing products."
+        description="Read the terms and conditions for using PRAYAG RO services and purchasing products."
       />
 
       <div className="container mx-auto px-4">
@@ -16,7 +16,7 @@ const TermsOfService = () => {
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">1. Acceptance of Terms</h2>
             <p>
-              By accessing and using AquaPure's website and services, you accept and agree to be bound
+              By accessing and using PRAYAG RO's website and services, you accept and agree to be bound
               by these Terms of Service. If you do not agree, please do not use our services.
             </p>
           </section>
@@ -74,7 +74,7 @@ const TermsOfService = () => {
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">8. Limitation of Liability</h2>
             <p>
-              AquaPure shall not be liable for any indirect, incidental, or consequential damages
+              PRAYAG RO shall not be liable for any indirect, incidental, or consequential damages
               arising from the use of our products or services.
             </p>
           </section>
@@ -84,9 +84,16 @@ const TermsOfService = () => {
             <p>
               For questions about these Terms, contact us at:
               <br />
-              Email: legal@aquapure.com
+              Email: legal@prayagro.com
               <br />
-              Phone: 1800-123-AQUA
+              Phone: +91 9140967681
+            </p>
+          </section>
+
+          <section className="mb-8 p-6 bg-slate-50 rounded-2xl border border-slate-200">
+            <h2 className="text-2xl font-semibold mb-3 text-slate-900">10. Governing Law & Jurisdiction</h2>
+            <p className="text-sm text-slate-700 leading-relaxed">
+              These Terms of Service and any contractual transactions conducted on this platform shall be governed by and construed in accordance with the laws of India. All disputes, differences, or claims arising out of or in connection with the purchase of PRAYAG RO products shall be subject to the exclusive jurisdiction of the competent courts in Prayagraj (Allahabad), Uttar Pradesh, India.
             </p>
           </section>
         </div>

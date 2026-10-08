@@ -17,50 +17,48 @@ import { Link } from "react-router-dom";
 
 const About = () => {
   const stats = [
-    { label: "Happy Customers", value: "5M+", icon: Users },
-    { label: "Years of Excellence", value: "15+", icon: Award },
-    { label: "Service Centers", value: "500+", icon: Target },
-    { label: "Products Sold", value: "10M+", icon: TrendingUp }
+    { label: "Direct Factory Pricing", value: "Zero Middlemen", icon: Award },
+    { label: "Filtration Precision", value: "0.0001 µm", icon: Target },
+    { label: "Tank Material", value: "Food-Grade ABS", icon: Shield },
+    { label: "Direct Brand Warranty", value: "1-Year On-Site", icon: CheckCircle }
   ];
 
   const values = [
     {
       icon: <Droplets className="h-8 w-8 text-primary" />,
       title: "Purity First",
-      description: "We never compromise on water quality. Every product undergoes rigorous testing to ensure 99.9% pure water."
+      description: "We never compromise on water quality. Every purifier is tested to eliminate heavy metals, dissolved salts, and bacteria."
     },
     {
       icon: <Heart className="h-8 w-8 text-primary" />,
-      title: "Customer Care",
-      description: "Your health and satisfaction are our top priorities. We provide 24/7 support and lifetime service."
+      title: "Direct Customer Care",
+      description: "Your family's health is our top priority. We provide direct factory engineer support and rapid 24-48 hr service dispatch."
     },
     {
       icon: <Leaf className="h-8 w-8 text-primary" />,
-      title: "Eco-Friendly",
-      description: "Sustainable technology that saves water and energy while protecting the environment."
+      title: "Eco Recovery Tech",
+      description: "High-recovery RO membranes designed to minimize water rejection while maintaining optimal mineral levels."
     },
     {
       icon: <Shield className="h-8 w-8 text-primary" />,
-      title: "Trust & Safety",
-      description: "Certified by international standards with comprehensive warranties on all products."
+      title: "Certified Components",
+      description: "Assembled exclusively with ISO 9001 tested parts, NSF standard membranes, and non-toxic virgin ABS plastic tanks."
     }
   ];
 
-  const milestones = [
-    { year: "2009", event: "AquaPure founded with a vision to provide pure water to every home" },
-    { year: "2012", event: "Launched first RO water purifier with mineral retention technology" },
-    { year: "2015", event: "Reached 1 million customers milestone across India" },
-    { year: "2018", event: "Introduced smart WiFi-enabled water purifiers" },
-    { year: "2021", event: "Expanded to 500+ service centers nationwide" },
-    { year: "2024", event: "Serving 5M+ families with pure, healthy water" }
+  const commitments = [
+    { step: "01", title: "Direct Factory Model", desc: "We eliminate retail layers, dealer commissions, and bloated advertising overhead, giving you premium copper-alkaline technology at honest manufacturer rates." },
+    { step: "02", title: "Heavy-Duty Component Engineering", desc: "Every PRAYAG RO model uses high-grade 100 GPD membranes and industrial booster pumps engineered to handle challenging borewell TDS up to 2,000 PPM." },
+    { step: "03", title: "Live Doorstep Purity Verification", desc: "Our installation technician tests your raw water TDS and purified water TDS with a calibrated digital meter before you sign off on the installation." },
+    { step: "04", title: "Comprehensive 1-Year On-Site AMC", desc: "Complete peace of mind with free doorstep installation, complimentary pre-filter kit worth ₹1,499, and comprehensive 12-month service warranty." }
   ];
 
   const certifications = [
-    "ISO 9001:2015 Certified",
-    "NSF International Certified",
-    "Water Quality Association Member",
-    "BIS Certified Products",
-    "Energy Star Rated"
+    "ISO 9001:2015 Quality Tested",
+    "NSF Standard RO Membrane",
+    "Water Quality Association (WQA) Member",
+    "100% Food-Grade Virgin ABS Tank",
+    "CE & RoHS Certified Electricals"
   ];
 
   return (
@@ -70,18 +68,17 @@ const About = () => {
         <div className="absolute inset-0 bg-gradient-hero opacity-10"></div>
         <div className="container mx-auto px-4 text-center relative z-10">
           <Badge className="bg-primary/10 text-primary border-primary/20 mb-4">
-            About AquaPure
+            About PRAYAG RO
           </Badge>
           <h1 className="text-4xl lg:text-5xl font-bold mb-6">
-            Pioneering Pure Water Solutions{" "}
+            Pioneering Pure Mineral Water Solutions{" "}
             <span className="bg-gradient-primary bg-clip-text text-transparent">
-              Since 2009
+              Across India
             </span>
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-            We're on a mission to make pure, healthy water accessible to every Indian household. 
-            With cutting-edge technology and unwavering commitment to quality, we've become India's 
-            most trusted water purifier brand.
+            We are dedicated to bringing pure, mineral-dense, copper-alkaline hydration to every Indian household. 
+            With 10-stage purification technology and uncompromising standards, PRAYAG RO is your family's trusted health partner.
           </p>
         </div>
       </section>
@@ -117,16 +114,15 @@ const About = () => {
             <h2 className="text-3xl font-bold text-center mb-8">Our Story</h2>
             <div className="prose prose-lg max-w-none text-muted-foreground space-y-4">
               <p>
-                AquaPure was born from a simple yet powerful vision: to ensure every Indian family 
-                has access to pure, safe drinking water. Founded in 2009 by a team of water treatment 
-                experts and engineers, we recognized the critical need for reliable water purification 
-                solutions in India.
+                PRAYAG RO was born with a single noble mission: "शुद्ध जल, स्वस्थ जीवन" • ensuring every family 
+                enjoys 100% safe, chemical-free, and mineral-enriched drinking water. Recognizing the wide variance 
+                in groundwater TDS across Indian cities and towns, our engineers developed multi-stage systems tailored 
+                to ground borewells, municipal supply, and tanker water.
               </p>
               <p>
-                What started as a small operation in Mumbai has grown into India's leading water 
-                purifier brand, serving over 5 million families across the country. Our success is 
-                built on three pillars: innovative technology, uncompromising quality, and exceptional 
-                customer service.
+                Assembled directly in our Indian manufacturing facilities, every PRAYAG RO unit combines 
+                10-stage reverse osmosis with vital Ayurvedic copper, zinc, and natural alkaline minerals, 
+                supported by our 24-48 hour doorstep installation and service promise.
               </p>
               <p>
                 Today, we continue to push the boundaries of water purification technology, introducing 
@@ -171,32 +167,32 @@ const About = () => {
         </div>
       </section>
 
-      {/* Timeline */}
+      {/* Founding Principles & Commitments */}
       <section className="py-16">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">Our Journey</h2>
+            <h2 className="text-3xl font-bold mb-4">Our Founding Principles & Quality Promise</h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Key milestones in our mission to provide pure water
+              How we deliver direct factory pricing without compromising on water purity
             </p>
           </div>
           
           <div className="max-w-3xl mx-auto">
             <div className="space-y-6">
-              {milestones.map((milestone, index) => (
+              {commitments.map((commitment, index) => (
                 <div key={index} className="flex gap-6">
                   <div className="flex flex-col items-center">
-                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      <CheckCircle className="h-6 w-6 text-primary" />
+                    <div className="w-12 h-12 rounded-full bg-sky-100 flex items-center justify-center font-bold text-sky-700 flex-shrink-0 text-sm">
+                      {commitment.step}
                     </div>
-                    {index < milestones.length - 1 && (
-                      <div className="w-0.5 h-full bg-primary/20 mt-2"></div>
+                    {index < commitments.length - 1 && (
+                      <div className="w-0.5 h-full bg-sky-200 mt-2"></div>
                     )}
                   </div>
                   <Card className="flex-1 border-0 shadow-soft bg-card/80 backdrop-blur-sm mb-6">
                     <CardContent className="p-6">
-                      <div className="text-2xl font-bold text-primary mb-2">{milestone.year}</div>
-                      <p className="text-muted-foreground">{milestone.event}</p>
+                      <div className="text-lg font-bold text-slate-900 mb-1.5">{commitment.title}</div>
+                      <p className="text-sm text-slate-600 leading-relaxed">{commitment.desc}</p>
                     </CardContent>
                   </Card>
                 </div>
@@ -238,11 +234,10 @@ const About = () => {
           <Card className="border-0 shadow-premium bg-gradient-hero text-white overflow-hidden">
             <CardContent className="p-12 text-center">
               <h2 className="text-3xl font-bold mb-4">
-                Join the AquaPure Family
+                Join the PRAYAG RO Family
               </h2>
               <p className="text-xl mb-8 opacity-90 max-w-2xl mx-auto">
-                Experience the difference of pure, healthy water. Explore our range of 
-                advanced water purifiers designed for your home.
+                Experience the natural taste of pure, copper-infused alkaline water. Explore our certified purifiers today.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button 

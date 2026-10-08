@@ -83,12 +83,20 @@ const productSchema = new Schema<IProduct>({
     default: true 
   }
 }, { 
-  timestamps: true 
+  timestamps: true,
+  toJSON: {
+    virtuals: true,
+    transform: (_doc: any, ret: any) => {
+      ret.id = ret._id?.toString();
+      delete ret.__v;
+      return ret;
+    }
+  },
+  toObject: { virtuals: true }
 });
 
 // Index for search
 productSchema.index({ name: 'text', description: 'text' });
 productSchema.index({ category: 1, price: 1 });
-productSchema.index({ slug: 1 });
 
 export default mongoose.model<IProduct>('Product', productSchema);

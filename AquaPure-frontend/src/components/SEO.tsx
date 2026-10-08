@@ -23,7 +23,7 @@ const SEO = ({
   currency = "INR",
   availability = "in stock",
 }: SEOProps) => {
-  const siteName = "AquaPure";
+  const siteName = "PRAYAG RO";
   const fullTitle = `${title} | ${siteName}`;
 
   return (
@@ -75,17 +75,17 @@ const SEO = ({
             "@context": "https://schema.org",
             "@type": "Organization",
             name: siteName,
-            url: "https://aquapure.com",
-            logo: "https://aquapure.com/logo.png",
+            url: "https://prayagro.com",
+            logo: "https://prayagro.com/logo.png",
             contactPoint: {
               "@type": "ContactPoint",
-              telephone: "+91-1800-123-AQUA",
+              telephone: "+91-9140967681",
               contactType: "Customer Service",
             },
             sameAs: [
-              "https://facebook.com/aquapure",
-              "https://twitter.com/aquapure",
-              "https://instagram.com/aquapure",
+              "https://facebook.com/prayagro",
+              "https://twitter.com/prayagro",
+              "https://instagram.com/prayagro",
             ],
           })}
         </script>

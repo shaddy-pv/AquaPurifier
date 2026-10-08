@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,50 +6,59 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Minus, Plus, Trash2, ShoppingBag, ArrowRight, Tag } from "lucide-react";
 import { useCartStore } from "@/store/cartStore";
+import { api } from "@/lib/api";
 import { toast } from "sonner";
 
-const COUPONS = {
-  "AQUA10": { discount: 10, type: "percentage" as const },
-  "SAVE500": { discount: 500, type: "fixed" as const },
-  "FIRST20": { discount: 20, type: "percentage" as const },
-};
-
 const Cart = () => {
-  const { items, updateQuantity, removeItem, getTotalPrice } = useCartStore();
+  const { 
+    items, 
+    updateQuantity, 
+    removeItem, 
+    getTotalPrice,
+    appliedCoupon,
+    applyCoupon: storeApplyCoupon,
+    removeCoupon: storeRemoveCoupon,
+    getDiscountAmount,
+    couponDescription
+  } = useCartStore();
   const [couponCode, setCouponCode] = useState("");
-  const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null);
+  const [storeSettings, setStoreSettings] = useState<{ taxRateGst?: number } | null>(null);
+
+  useEffect(() => {
+    api.settings.get()
+      .then((res) => {
+        if (res.success && res.settings) {
+          setStoreSettings(res.settings);
+        }
+      })
+      .catch((err) => console.warn("Could not load backend store settings in cart:", err));
+  }, []);
   
   const totalPrice = getTotalPrice();
-  
-  const applyCoupon = () => {
-    const coupon = COUPONS[couponCode.toUpperCase() as keyof typeof COUPONS];
-    if (coupon) {
-      setAppliedCoupon(couponCode.toUpperCase());
-      toast.success("Coupon applied successfully!");
+  const discount = getDiscountAmount();
+  const subtotal = Math.max(0, totalPrice - discount);
+  const gstRate = storeSettings?.taxRateGst ?? 0;
+  const gst = gstRate > 0 ? Math.round(subtotal * (gstRate / 100)) : 0;
+  const finalTotal = subtotal + gst;
+
+  const handleApplyCoupon = () => {
+    if (!couponCode) {
+      toast.error("Please enter a coupon code");
+      return;
+    }
+    const result = storeApplyCoupon(couponCode);
+    if (result.success) {
+      toast.success(result.message);
+      setCouponCode("");
     } else {
-      toast.error("Invalid coupon code");
+      toast.error(result.message);
     }
   };
 
-  const removeCoupon = () => {
-    setAppliedCoupon(null);
-    setCouponCode("");
+  const handleRemoveCoupon = () => {
+    storeRemoveCoupon();
     toast.info("Coupon removed");
   };
-
-  const calculateDiscount = () => {
-    if (!appliedCoupon) return 0;
-    const coupon = COUPONS[appliedCoupon as keyof typeof COUPONS];
-    if (coupon.type === "percentage") {
-      return Math.round((totalPrice * coupon.discount) / 100);
-    }
-    return coupon.discount;
-  };
-
-  const discount = calculateDiscount();
-  const subtotal = totalPrice - discount;
-  const gst = Math.round(subtotal * 0.18);
-  const finalTotal = subtotal + gst;
 
   if (items.length === 0) {
     return (
@@ -89,40 +98,40 @@ const Cart = () => {
                 key={item.id}
                 className="border-0 shadow-soft bg-card/80 backdrop-blur-sm"
               >
-                <CardContent className="p-6">
-                  <div className="flex gap-6">
+                <CardContent className="p-4 sm:p-6">
+                  <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 items-start sm:items-center">
                     <img
                       src={item.image}
                       alt={item.name}
-                      className="w-24 h-24 object-cover rounded-lg"
+                      className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-lg shrink-0"
                     />
                     
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-lg mb-2">{item.name}</h3>
-                      <p className="text-2xl font-bold text-primary mb-4">
+                    <div className="flex-1 w-full">
+                      <h3 className="font-semibold text-base sm:text-lg mb-1">{item.name}</h3>
+                      <p className="text-xl sm:text-2xl font-bold text-primary mb-3">
                         ₹{item.price.toLocaleString()}
                       </p>
                       
-                      <div className="flex items-center gap-4">
+                      <div className="flex flex-wrap items-center gap-3">
                         <div className="flex items-center border rounded-lg">
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                            className="h-10 w-10"
+                            className="h-9 w-9 p-0"
                           >
-                            <Minus className="h-4 w-4" />
+                            <Minus className="h-3.5 w-3.5" />
                           </Button>
-                          <span className="w-12 text-center font-medium">
+                          <span className="w-10 text-center font-medium text-sm">
                             {item.quantity}
                           </span>
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                            className="h-10 w-10"
+                            className="h-9 w-9 p-0"
                           >
-                            <Plus className="h-4 w-4" />
+                            <Plus className="h-3.5 w-3.5" />
                           </Button>
                         </div>
                         
@@ -130,17 +139,17 @@ const Cart = () => {
                           variant="ghost"
                           size="sm"
                           onClick={() => removeItem(item.id)}
-                          className="text-destructive hover:text-destructive"
+                          className="text-destructive hover:text-destructive text-xs h-9"
                         >
-                          <Trash2 className="h-4 w-4 mr-2" />
+                          <Trash2 className="h-3.5 w-3.5 mr-1" />
                           Remove
                         </Button>
                       </div>
                     </div>
                     
-                    <div className="text-right">
-                      <p className="text-sm text-muted-foreground mb-1">Subtotal</p>
-                      <p className="text-xl font-bold">
+                    <div className="flex sm:flex-col justify-between sm:justify-center items-center sm:items-end w-full sm:w-auto pt-3 sm:pt-0 border-t sm:border-t-0 border-muted">
+                      <p className="text-xs text-muted-foreground sm:mb-1">Subtotal</p>
+                      <p className="text-lg sm:text-xl font-bold">
                         ₹{(item.price * item.quantity).toLocaleString()}
                       </p>
                     </div>
@@ -166,20 +175,21 @@ const Cart = () => {
                       disabled={!!appliedCoupon}
                     />
                     {appliedCoupon ? (
-                      <Button variant="outline" onClick={removeCoupon}>
+                      <Button variant="outline" onClick={handleRemoveCoupon}>
                         Remove
                       </Button>
                     ) : (
-                      <Button onClick={applyCoupon}>
+                      <Button onClick={handleApplyCoupon}>
                         <Tag className="h-4 w-4 mr-2" />
                         Apply
                       </Button>
                     )}
                   </div>
                   {appliedCoupon && (
-                    <p className="text-sm text-success mt-2">
-                      Coupon "{appliedCoupon}" applied!
-                    </p>
+                    <div className="flex items-center justify-between text-xs text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-100 mt-2">
+                      <span>✓ Coupon "{appliedCoupon}" applied!</span>
+                      {couponDescription && <span className="font-semibold">{couponDescription}</span>}
+                    </div>
                   )}
                 </div>
                 
@@ -198,10 +208,12 @@ const Cart = () => {
                     <span className="text-muted-foreground">Shipping</span>
                     <span className="font-medium text-success">FREE</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Tax (18% GST)</span>
-                    <span className="font-medium">₹{gst.toLocaleString()}</span>
-                  </div>
+                  {gst > 0 && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Tax ({gstRate}% GST)</span>
+                      <span className="font-medium">₹{gst.toLocaleString()}</span>
+                    </div>
+                  )}
                   
                   <Separator />
                   

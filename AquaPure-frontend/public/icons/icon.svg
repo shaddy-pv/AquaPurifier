@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="skyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0284c7" />
+      <stop offset="50%" stop-color="#0ea5e9" />
+      <stop offset="100%" stop-color="#38bdf8" />
+    </linearGradient>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0b1329" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="16" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Background rounded squircle -->
+  <rect width="512" height="512" rx="128" fill="url(#bgGrad)"/>
+
+  <!-- Subtle glowing halo ring -->
+  <circle cx="256" cy="265" r="175" fill="none" stroke="#38bdf8" stroke-width="4" opacity="0.25"/>
+
+  <!-- Pure Water Droplet Motif -->
+  <path d="M 256 95 C 256 95, 145 250, 145 330 C 145 391 195 440 256 440 C 317 440, 367 391, 367 330 C 367 250, 256 95, 256 95 Z"
+        fill="url(#skyGrad)" filter="url(#glow)" />
+
+  <!-- Inner droplet shimmer shine -->
+  <path d="M 256 140 C 256 140, 185 260, 185 320 C 185 365, 217 400, 256 400 C 235 400, 205 375, 205 330 C 205 275, 256 140, 256 140 Z"
+        fill="#ffffff" opacity="0.45"/>
+
+  <!-- Mineral purity sparkles -->
+  <circle cx="295" cy="275" r="8" fill="#ffffff" opacity="0.8"/>
+  <circle cx="240" cy="350" r="14" fill="#ffffff" opacity="0.9"/>
+  <circle cx="270" cy="370" r="7" fill="#ffffff" opacity="0.75"/>
+</svg>

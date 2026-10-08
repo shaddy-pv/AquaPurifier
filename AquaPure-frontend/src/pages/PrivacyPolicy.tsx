@@ -5,7 +5,7 @@ const PrivacyPolicy = () => {
     <div className="min-h-screen py-12">
       <SEO
         title="Privacy Policy"
-        description="Learn how AquaPure collects, uses, and protects your personal information."
+        description="Learn how PRAYAG RO collects, uses, and protects your personal information."
       />
 
       <div className="container mx-auto px-4">
@@ -80,10 +80,27 @@ const PrivacyPolicy = () => {
             <p>
               If you have questions about this Privacy Policy, please contact us at:
               <br />
-              Email: privacy@aquapure.com
+              Email: privacy@prayagro.com
               <br />
-              Phone: 1800-123-AQUA
+              Phone: +91 9140967681
             </p>
+          </section>
+
+          <section className="mb-8 p-6 bg-sky-50/60 rounded-2xl border border-sky-100">
+            <h2 className="text-2xl font-semibold mb-3 text-slate-900">8. Grievance Redressal Officer (Statutory Compliance)</h2>
+            <p className="text-sm text-slate-700 leading-relaxed mb-4">
+              In accordance with the Information Technology Act, 2000, and Rule 5(9) of the Consumer Protection (E-Commerce) Rules, 2020, the contact details of the designated Grievance Officer are:
+            </p>
+            <div className="text-sm text-slate-800 space-y-1 font-medium">
+              <p><strong>Name / Officer:</strong> Grievance Redressal Officer</p>
+              <p><strong>Entity:</strong> PRAYAG RO</p>
+              <p><strong>Store & Office Address:</strong> PRAYAG RO, 31/3B Rajrooppur, Prayagraj, UP - 211011, India</p>
+              <p><strong>Direct Email:</strong> grievance@prayagro.com</p>
+              <p><strong>Helpline:</strong> +91 9140967681 (Mon - Sat, 10:00 AM - 6:00 PM IST)</p>
+              <p className="text-xs text-slate-500 pt-2">
+                * All consumer complaints and data grievances are officially acknowledged within 48 hours and redressed within 30 calendar days.
+              </p>
+            </div>
           </section>
         </div>
       </div>

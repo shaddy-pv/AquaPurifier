@@ -1,4 +1,4 @@
-export const WHATSAPP_NUMBER = "919598353650";
+export const WHATSAPP_NUMBER = "919140967681";
 
 export interface BookingData {
   serviceName: string;

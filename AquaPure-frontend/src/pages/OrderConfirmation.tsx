@@ -1,10 +1,24 @@
-import { Link } from "react-router-dom";
+import { useSearchParams, Link } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, Package, Home, FileText } from "lucide-react";
+import { api, ApiOrder } from "@/lib/api";
 
 const OrderConfirmation = () => {
-  const orderNumber = `AQP${Date.now().toString().slice(-8)}`;
+  const [searchParams] = useSearchParams();
+  const orderNumberParam = searchParams.get("orderNumber");
+  const orderNumber = orderNumberParam || `AQP${Date.now().toString().slice(-8)}`;
+
+  const [order, setOrder] = useState<ApiOrder | null>(null);
+
+  useEffect(() => {
+    if (orderNumberParam) {
+      api.orders.getByNumber(orderNumberParam)
+        .then((data) => setOrder(data))
+        .catch((err) => console.warn("Could not load confirmation order:", err.message));
+    }
+  }, [orderNumberParam]);
 
   return (
     <div className="min-h-screen flex items-center justify-center py-12">
@@ -16,7 +30,7 @@ const OrderConfirmation = () => {
             </div>
             <h1 className="text-4xl font-bold mb-4">Order Confirmed!</h1>
             <p className="text-xl text-muted-foreground">
-              Thank you for your purchase. Your order has been received.
+              Thank you for your purchase. Your order has been placed successfully.
             </p>
           </div>
 
@@ -27,10 +41,16 @@ const OrderConfirmation = () => {
                   <p className="text-sm text-muted-foreground mb-1">Order Number</p>
                   <p className="text-2xl font-bold text-primary">{orderNumber}</p>
                 </div>
-                <p className="text-muted-foreground">
-                  A confirmation email has been sent to your email address with order details.
+                {order && (
+                  <div className="py-2 text-sm text-muted-foreground">
+                    <p>Total Paid / Due: <strong className="text-foreground">₹{order.total.toLocaleString()}</strong></p>
+                    <p>Payment: <strong className="text-foreground">{order.paymentMethod.toUpperCase()}</strong> ({order.paymentStatus})</p>
+                  </div>
+                )}
+                <p className="text-muted-foreground text-sm">
+                  We've sent an order confirmation with tracking details to your email address.
                 </p>
-                <div className="grid grid-cols-3 gap-4 pt-4">
+                <div className="grid grid-cols-3 gap-4 pt-4 border-t">
                   <div className="text-center">
                     <Package className="h-8 w-8 text-primary mx-auto mb-2" />
                     <p className="text-sm font-medium">Processing</p>
@@ -56,6 +76,9 @@ const OrderConfirmation = () => {
               </Link>
             </Button>
             <Button size="lg" variant="outline" asChild>
+              <Link to={`/track-order?order=${orderNumber}`}>Track This Order</Link>
+            </Button>
+            <Button size="lg" variant="ghost" asChild>
               <Link to="/products">Continue Shopping</Link>
             </Button>
           </div>

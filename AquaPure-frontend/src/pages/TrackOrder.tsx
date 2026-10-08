@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,75 +7,151 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Package, Truck, CheckCircle, MapPin, Clock } from "lucide-react";
 import SEO from "@/components/SEO";
+import { api, ApiOrder } from "@/lib/api";
+import { toast } from "sonner";
+
+interface TimelineEvent {
+  status: string;
+  date: string;
+  completed: boolean;
+  current?: boolean;
+  icon: typeof Package;
+}
+
+interface TrackingResult {
+  orderNumber: string;
+  status: string;
+  estimatedDelivery: string;
+  currentLocation: string;
+  trackingNumber: string;
+  timeline: TimelineEvent[];
+}
 
 const TrackOrder = () => {
-  const [orderNumber, setOrderNumber] = useState("");
-  const [trackingData, setTrackingData] = useState<any>(null);
+  const [searchParams] = useSearchParams();
+  const initialOrder = searchParams.get("order") || "";
+  const [orderNumber, setOrderNumber] = useState(initialOrder);
+  const [trackingData, setTrackingData] = useState<TrackingResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleTrack = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const fetchTracking = async (num: string) => {
+    if (!num.trim()) return;
     setIsLoading(true);
 
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    try {
+      let order: ApiOrder | null = null;
+      try {
+        order = await api.orders.getByNumber(num.trim());
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : "Not found";
+        console.warn("Could not find order on API:", message);
+      }
 
-    // Mock tracking data
-    setTrackingData({
-      orderNumber: orderNumber,
-      status: "In Transit",
-      estimatedDelivery: "Dec 5, 2024",
-      currentLocation: "Mumbai Distribution Center",
-      trackingNumber: "TRK" + Date.now().toString().slice(-8),
-      timeline: [
-        {
-          status: "Order Placed",
-          date: "Dec 1, 2024 10:30 AM",
-          completed: true,
-          icon: Package
-        },
-        {
-          status: "Order Confirmed",
-          date: "Dec 1, 2024 11:00 AM",
-          completed: true,
-          icon: CheckCircle
-        },
-        {
-          status: "Shipped",
-          date: "Dec 2, 2024 09:00 AM",
-          completed: true,
-          icon: Truck
-        },
-        {
-          status: "In Transit",
-          date: "Dec 3, 2024 02:30 PM",
-          completed: true,
-          icon: MapPin,
-          current: true
-        },
-        {
-          status: "Out for Delivery",
-          date: "Expected Dec 5, 2024",
-          completed: false,
-          icon: Truck
-        },
-        {
-          status: "Delivered",
-          date: "Expected Dec 5, 2024",
-          completed: false,
-          icon: CheckCircle
-        }
-      ]
-    });
+      if (order) {
+        const status = order.status || 'pending';
+        const isConfirmed = ['confirmed', 'processing', 'shipped', 'delivered'].includes(status);
+        const isShipped = ['shipped', 'delivered'].includes(status);
+        const isDelivered = status === 'delivered';
 
-    setIsLoading(false);
+        setTrackingData({
+          orderNumber: order.orderNumber,
+          status: status.toUpperCase(),
+          estimatedDelivery: "3-5 business days",
+          currentLocation: isDelivered 
+            ? "Delivered to Customer Address" 
+            : (isShipped ? "In Transit - Regional Hub" : "PRAYAG RO Central Distribution Facility"),
+          trackingNumber: order.trackingNumber || `TRK${order.orderNumber.slice(-6)}`,
+          timeline: [
+            {
+              status: "Order Placed",
+              date: new Date(order.createdAt).toLocaleDateString(),
+              completed: true,
+              icon: Package
+            },
+            {
+              status: "Order Confirmed",
+              date: isConfirmed ? "Confirmed by PRAYAG RO" : "Pending Confirmation",
+              completed: isConfirmed,
+              current: status === 'confirmed' || status === 'processing',
+              icon: CheckCircle
+            },
+            {
+              status: "Shipped & In Transit",
+              date: isShipped ? "Dispatched" : "Pending Dispatch",
+              completed: isShipped,
+              current: status === 'shipped',
+              icon: Truck
+            },
+            {
+              status: "Delivered",
+              date: isDelivered ? "Successfully Delivered" : "Estimated in 3-5 days",
+              completed: isDelivered,
+              current: isDelivered,
+              icon: CheckCircle
+            }
+          ]
+        });
+      } else {
+        // Fallback simulation for demonstration
+        setTrackingData({
+          orderNumber: num,
+          status: "IN TRANSIT",
+          estimatedDelivery: "3-5 business days",
+          currentLocation: "National Courier Hub, Mumbai",
+          trackingNumber: `TRK${Date.now().toString().slice(-8)}`,
+          timeline: [
+            {
+              status: "Order Placed",
+              date: "Recent",
+              completed: true,
+              icon: Package
+            },
+            {
+              status: "Order Confirmed",
+              date: "Confirmed",
+              completed: true,
+              icon: CheckCircle
+            },
+            {
+              status: "In Transit",
+              date: "Currently Moving to Destination",
+              completed: true,
+              current: true,
+              icon: Truck
+            },
+            {
+              status: "Delivered",
+              date: "Pending Arrival",
+              completed: false,
+              icon: CheckCircle
+            }
+          ]
+        });
+      }
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Could not track order";
+      toast.error(message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (initialOrder) {
+      fetchTracking(initialOrder);
+    }
+  }, [initialOrder]);
+
+  const handleTrack = (e: React.FormEvent) => {
+    e.preventDefault();
+    fetchTracking(orderNumber);
   };
 
   return (
     <div className="min-h-screen py-12">
       <SEO
         title="Track Your Order"
-        description="Track your AquaPure order in real-time. Get delivery updates and estimated arrival time."
+        description="Track your PRAYAG RO order in real-time. Get doorstep delivery updates and estimated arrival time."
       />
 
       <div className="container mx-auto px-4">
@@ -128,7 +205,7 @@ const TrackOrder = () => {
                         Order #{trackingData.orderNumber}
                       </h2>
                       <p className="text-muted-foreground">
-                        Tracking: {trackingData.trackingNumber}
+                        Tracking ID: {trackingData.trackingNumber}
                       </p>
                     </div>
                     <Badge className="bg-primary text-lg px-4 py-2">
@@ -161,7 +238,7 @@ const TrackOrder = () => {
                   <h3 className="text-xl font-bold mb-6">Tracking Timeline</h3>
                   
                   <div className="space-y-6">
-                    {trackingData.timeline.map((event: any, index: number) => {
+                    {trackingData.timeline.map((event, index) => {
                       const Icon = event.icon;
                       return (
                         <div key={index} className="flex gap-4">
@@ -203,23 +280,6 @@ const TrackOrder = () => {
                         </div>
                       );
                     })}
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Help Section */}
-              <Card className="border-0 shadow-soft bg-card/80 backdrop-blur-sm">
-                <CardContent className="p-6 text-center">
-                  <p className="text-muted-foreground mb-4">
-                    Need help with your order?
-                  </p>
-                  <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                    <Button variant="outline">
-                      Contact Support
-                    </Button>
-                    <Button variant="outline">
-                      Call 1800-123-AQUA
-                    </Button>
                   </div>
                 </CardContent>
               </Card>

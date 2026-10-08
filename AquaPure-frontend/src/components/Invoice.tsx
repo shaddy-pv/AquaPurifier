@@ -63,16 +63,17 @@ const Invoice = ({
           {/* Header */}
           <div className="flex justify-between items-start mb-8">
             <div>
-              <h1 className="text-3xl font-bold text-primary mb-2">AquaPure</h1>
-              <p className="text-sm text-muted-foreground">
-                Premium Water Purifiers<br />
-                Mumbai, Maharashtra, India<br />
-                support@aquapure.com<br />
-                1800-123-AQUA
+              <h1 className="text-3xl font-extrabold text-sky-600 mb-2">PRAYAG RO</h1>
+              <p className="text-sm text-slate-500">
+                PRAYAG RO<br />
+                31/3B Rajrooppur, Prayagraj, UP - 211011, India<br />
+                support@prayagro.com<br />
+                Helpline: +91 9140967681
               </p>
             </div>
             <div className="text-right">
-              <h2 className="text-2xl font-bold mb-2">INVOICE</h2>
+              <h2 className="text-2xl font-bold mb-1">RETAIL INVOICE</h2>
+              <p className="text-xs text-slate-500 mb-2 font-medium">Bill of Supply • Cash / Online Memo</p>
               <p className="text-sm">
                 <span className="font-semibold">Order #:</span> {orderNumber}<br />
                 <span className="font-semibold">Date:</span> {new Date(orderDate).toLocaleDateString()}
@@ -136,10 +137,12 @@ const Invoice = ({
                   <span>₹{shipping.toLocaleString()}</span>
                 </div>
               )}
-              <div className="flex justify-between text-sm">
-                <span>GST (18%):</span>
-                <span>₹{tax.toLocaleString()}</span>
-              </div>
+              {tax > 0 && (
+                <div className="flex justify-between text-sm">
+                  <span>GST:</span>
+                  <span>₹{tax.toLocaleString()}</span>
+                </div>
+              )}
               <Separator />
               <div className="flex justify-between font-bold text-lg">
                 <span>Total:</span>
@@ -150,8 +153,8 @@ const Invoice = ({
 
           {/* Footer */}
           <div className="text-center text-sm text-muted-foreground pt-8 border-t">
-            <p>Thank you for your purchase!</p>
-            <p className="mt-2">For any queries, contact us at support@aquapure.com or call 1800-123-AQUA</p>
+            <p>Thank you for choosing PRAYAG RO!</p>
+            <p className="mt-2">For any queries or doorstep installation support, contact us at support@prayagro.com or call +91 9140967681</p>
           </div>
         </CardContent>
       </Card>

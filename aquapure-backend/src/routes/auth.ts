@@ -1,12 +1,16 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 import User from '../models/User';
-import { authenticate, AuthRequest } from '../middleware/auth';
+import { authenticate, isAdmin, AuthRequest } from '../middleware/auth';
+import { sendPasswordResetEmail } from '../services/email';
+
+import { authLimiter } from '../middleware/rateLimiter';
 
 const router = express.Router();
 
 // Register new user
-router.post('/register', async (req, res) => {
+router.post('/register', authLimiter, async (req, res) => {
   try {
     const { name, email, password, phone } = req.body;
 
@@ -14,6 +18,18 @@ router.post('/register', async (req, res) => {
     if (!name || !email || !password) {
       return res.status(400).json({ 
         message: 'Please provide name, email, and password' 
+      });
+    }
+
+    if (typeof email !== 'string' || typeof password !== 'string' || typeof name !== 'string') {
+      return res.status(400).json({
+        message: 'Name, email, and password must be valid strings'
+      });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({
+        message: 'Password must be at least 6 characters long'
       });
     }
 
@@ -34,10 +50,7 @@ router.post('/register', async (req, res) => {
     });
 
     // Generate JWT token
-    const jwtSecret = process.env.JWT_SECRET;
-    if (!jwtSecret) {
-      throw new Error('JWT_SECRET is not defined');
-    }
+    const jwtSecret = process.env.JWT_SECRET || 'aquapure-super-secret-jwt-key';
 
     const token = jwt.sign(
       { 
@@ -53,7 +66,7 @@ router.post('/register', async (req, res) => {
       message: 'Registration successful',
       token,
       user: {
-        id: user._id,
+        id: user._id.toString(),
         name: user.name,
         email: user.email,
         role: user.role,
@@ -70,7 +83,7 @@ router.post('/register', async (req, res) => {
 });
 
 // Login user
-router.post('/login', async (req, res) => {
+router.post('/login', authLimiter, async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -78,6 +91,12 @@ router.post('/login', async (req, res) => {
     if (!email || !password) {
       return res.status(400).json({ 
         message: 'Please provide email and password' 
+      });
+    }
+
+    if (typeof email !== 'string' || typeof password !== 'string') {
+      return res.status(400).json({
+        message: 'Email and password must be valid strings'
       });
     }
 
@@ -98,10 +117,7 @@ router.post('/login', async (req, res) => {
     }
 
     // Generate JWT token
-    const jwtSecret = process.env.JWT_SECRET;
-    if (!jwtSecret) {
-      throw new Error('JWT_SECRET is not defined');
-    }
+    const jwtSecret = process.env.JWT_SECRET || 'aquapure-super-secret-jwt-key';
 
     const token = jwt.sign(
       { 
@@ -117,7 +133,7 @@ router.post('/login', async (req, res) => {
       message: 'Login successful',
       token,
       user: {
-        id: user._id,
+        id: user._id.toString(),
         name: user.name,
         email: user.email,
         role: user.role,
@@ -142,7 +158,14 @@ router.get('/me', authenticate, async (req: AuthRequest, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    res.json(user);
+    res.json({
+      id: user._id.toString(),
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      phone: user.phone,
+      addresses: user.addresses || []
+    });
   } catch (error: any) {
     console.error('Get profile error:', error);
     res.status(500).json({ 
@@ -157,9 +180,14 @@ router.put('/profile', authenticate, async (req: AuthRequest, res) => {
   try {
     const { name, phone, addresses } = req.body;
     
+    const updatePayload: any = {};
+    if (name !== undefined) updatePayload.name = name;
+    if (phone !== undefined) updatePayload.phone = phone;
+    if (addresses !== undefined) updatePayload.addresses = addresses;
+
     const user = await User.findByIdAndUpdate(
       req.user?.id,
-      { name, phone, addresses },
+      updatePayload,
       { new: true, runValidators: true }
     ).select('-password');
 
@@ -169,7 +197,14 @@ router.put('/profile', authenticate, async (req: AuthRequest, res) => {
 
     res.json({
       message: 'Profile updated successfully',
-      user
+      user: {
+        id: user._id.toString(),
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        phone: user.phone,
+        addresses: user.addresses
+      }
     });
   } catch (error: any) {
     console.error('Update profile error:', error);
@@ -188,6 +223,12 @@ router.post('/change-password', authenticate, async (req: AuthRequest, res) => {
     if (!currentPassword || !newPassword) {
       return res.status(400).json({ 
         message: 'Please provide current and new password' 
+      });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({
+        message: 'New password must be at least 6 characters long'
       });
     }
 
@@ -213,6 +254,114 @@ router.post('/change-password', authenticate, async (req: AuthRequest, res) => {
       message: 'Failed to change password', 
       error: error.message 
     });
+  }
+});
+
+// Forgot password
+router.post('/forgot-password', async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ message: 'Email is required' });
+    }
+
+    const user = await User.findOne({ email: email.toLowerCase() });
+    if (!user) {
+      // Don't disclose whether email exists
+      return res.json({ 
+        message: 'If that email address is in our system, we have sent a password reset link.' 
+      });
+    }
+
+    // Generate random unhashed reset token
+    const rawResetToken = crypto.randomBytes(32).toString('hex');
+    user.resetPasswordToken = crypto.createHash('sha256').update(rawResetToken).digest('hex');
+    user.resetPasswordExpires = new Date(Date.now() + 3600000); // 1 hour
+    await user.save();
+
+    // Send reset email
+    sendPasswordResetEmail(user.email, rawResetToken).catch(err => {
+      console.error('Failed to send reset email:', err);
+    });
+
+    res.json({ 
+      message: 'If that email address is in our system, we have sent a password reset link.' 
+    });
+  } catch (error: any) {
+    console.error('Forgot password error:', error);
+    res.status(500).json({ 
+      message: 'Error processing forgot password request', 
+      error: error.message 
+    });
+  }
+});
+
+// Reset password
+router.post('/reset-password', async (req, res) => {
+  try {
+    const { token, newPassword } = req.body;
+
+    if (!token || !newPassword) {
+      return res.status(400).json({ message: 'Token and new password are required' });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ message: 'Password must be at least 6 characters long' });
+    }
+
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+
+    const user = await User.findOne({
+      resetPasswordToken: hashedToken,
+      resetPasswordExpires: { $gt: new Date() }
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: 'Password reset token is invalid or has expired' });
+    }
+
+    user.password = newPassword;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+    await user.save();
+
+    res.json({ message: 'Password has been reset successfully. You can now login.' });
+  } catch (error: any) {
+    console.error('Reset password error:', error);
+    res.status(500).json({ 
+      message: 'Failed to reset password', 
+      error: error.message 
+    });
+  }
+});
+
+// Get all users (Admin only)
+router.get('/users', authenticate, isAdmin, async (req: AuthRequest, res) => {
+  try {
+    const users = await User.find().select('-password').sort({ createdAt: -1 });
+    res.json({ users });
+  } catch (error: any) {
+    console.error('Get all users error:', error);
+    res.status(500).json({ message: 'Failed to fetch users', error: error.message });
+  }
+});
+
+// Update user role (Admin only)
+router.patch('/users/:id/role', authenticate, isAdmin, async (req: AuthRequest, res) => {
+  try {
+    const { role } = req.body;
+    if (!['customer', 'admin'].includes(role)) {
+      return res.status(400).json({ message: 'Invalid role. Must be customer or admin.' });
+    }
+    const user = await User.findByIdAndUpdate(req.params.id, { role }, { new: true }).select('-password');
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.json({ message: 'User role updated successfully', user });
+  } catch (error: any) {
+    console.error('Update user role error:', error);
+    res.status(500).json({ message: 'Failed to update user role', error: error.message });
   }
 });
 

@@ -1,7 +1,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Star, ShoppingCart, Heart } from "lucide-react";
+import { Star, ShoppingCart, Heart, ShieldCheck } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useCartStore } from "@/store/cartStore";
 import { useWishlistStore } from "@/store/wishlistStore";
@@ -79,21 +79,10 @@ const ProductQuickView = ({ open, onOpenChange, product }: ProductQuickViewProps
             <div>
               <h3 className="text-2xl font-bold mb-2">{product.name}</h3>
               <div className="flex items-center space-x-2 mb-3">
-                <div className="flex items-center">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className={`h-4 w-4 ${
-                        i < Math.floor(product.rating)
-                          ? "text-amber-400 fill-amber-400"
-                          : "text-muted-foreground"
-                      }`}
-                    />
-                  ))}
+                <div className="flex items-center gap-1.5 text-xs font-bold text-sky-800 bg-sky-50 border border-sky-100 px-2.5 py-1 rounded-md">
+                  <ShieldCheck className="h-4 w-4 text-sky-600 shrink-0" />
+                  <span>Direct Factory Tested • 100% Food-Grade Virgin ABS</span>
                 </div>
-                <span className="text-sm text-muted-foreground">
-                  ({product.reviews} reviews)
-                </span>
               </div>
             </div>
 

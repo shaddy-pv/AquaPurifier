@@ -33,14 +33,17 @@ const ForgotPassword = () => {
     <div className="min-h-screen flex items-center justify-center py-12 px-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center space-x-2 group">
-            <div className="relative">
-              <Droplets className="h-10 w-10 text-primary group-hover:text-primary-light transition-colors" />
-              <div className="absolute inset-0 bg-primary/20 rounded-full blur-lg group-hover:bg-primary-light/30 transition-all"></div>
+          <Link to="/" className="inline-flex items-center space-x-2.5 group">
+            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-sky-500 to-cyan-600 text-white flex items-center justify-center shadow-md">
+              <Droplets className="h-6 w-6 text-white" />
             </div>
-            <span className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-              AquaPure
-            </span>
+            <div className="flex flex-col text-left">
+              <div className="flex items-center gap-1 leading-none">
+                <span className="text-2xl font-extrabold text-slate-900">PRAYAG</span>
+                <span className="bg-sky-600 text-white font-black text-xs px-1.5 py-0.5 rounded">RO</span>
+              </div>
+              <span className="text-[10px] text-sky-700 font-bold uppercase mt-0.5">शुद्ध जल • स्वस्थ जीवन</span>
+            </div>
           </Link>
         </div>
 

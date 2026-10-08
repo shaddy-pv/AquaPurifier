@@ -1,36 +1,45 @@
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Package, Eye, Download } from "lucide-react";
+import { Package, Eye, Download, Truck } from "lucide-react";
 import { Link } from "react-router-dom";
+import { api, ApiOrder } from "@/lib/api";
 
 const OrderHistory = () => {
-  const orders = [
-    {
-      id: "AQP12345678",
-      date: "2024-11-28",
-      total: 22999,
-      status: "Delivered",
-      items: 2,
-      statusColor: "bg-success"
-    },
-    {
-      id: "AQP12345679",
-      date: "2024-11-25",
-      total: 18999,
-      status: "Shipped",
-      items: 1,
-      statusColor: "bg-primary"
-    },
-    {
-      id: "AQP12345680",
-      date: "2024-11-20",
-      total: 35999,
-      status: "Processing",
-      items: 3,
-      statusColor: "bg-amber-500"
+  const [orders, setOrders] = useState<ApiOrder[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    api.orders.getMyOrders()
+      .then((data) => {
+        setOrders(data || []);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.warn("Could not fetch orders from API:", err.message);
+        setLoading(false);
+      });
+  }, []);
+
+  const getStatusColor = (status: string) => {
+    switch (status?.toLowerCase()) {
+      case "delivered": return "bg-success";
+      case "shipped": return "bg-primary";
+      case "confirmed":
+      case "processing": return "bg-amber-500";
+      case "cancelled": return "bg-destructive";
+      default: return "bg-muted-foreground";
     }
-  ];
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen py-12 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen py-12">
@@ -46,16 +55,16 @@ const OrderHistory = () => {
           <div className="space-y-4">
             {orders.map((order) => (
               <Card 
-                key={order.id}
+                key={order.id || order.orderNumber}
                 className="border-0 shadow-soft hover:shadow-premium transition-all bg-card/80 backdrop-blur-sm"
               >
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between mb-4">
                     <div>
                       <p className="text-sm text-muted-foreground">Order ID</p>
-                      <p className="font-bold text-lg">{order.id}</p>
+                      <p className="font-bold text-lg">{order.orderNumber}</p>
                     </div>
-                    <Badge className={`${order.statusColor} text-white`}>
+                    <Badge className={`${getStatusColor(order.status)} text-white capitalize`}>
                       {order.status}
                     </Badge>
                   </div>
@@ -63,32 +72,29 @@ const OrderHistory = () => {
                   <div className="grid grid-cols-3 gap-4 mb-4">
                     <div>
                       <p className="text-sm text-muted-foreground">Date</p>
-                      <p className="font-medium">{new Date(order.date).toLocaleDateString()}</p>
+                      <p className="font-medium">{new Date(order.createdAt).toLocaleDateString()}</p>
                     </div>
                     <div>
                       <p className="text-sm text-muted-foreground">Items</p>
-                      <p className="font-medium">{order.items} items</p>
+                      <p className="font-medium">{order.items?.length || 1} items</p>
                     </div>
                     <div>
                       <p className="text-sm text-muted-foreground">Total</p>
-                      <p className="font-medium">₹{order.total.toLocaleString()}</p>
+                      <p className="font-medium">₹{order.total?.toLocaleString()}</p>
                     </div>
                   </div>
 
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm" className="flex-1">
-                      <Eye className="h-4 w-4 mr-2" />
-                      View Details
+                    <Button variant="outline" size="sm" className="flex-1" asChild>
+                      <Link to={`/track-order?order=${order.orderNumber}`}>
+                        <Truck className="h-4 w-4 mr-2" />
+                        Track Order
+                      </Link>
                     </Button>
-                    <Button variant="outline" size="sm" className="flex-1">
+                    <Button variant="outline" size="sm" className="flex-1" onClick={() => window.print()}>
                       <Download className="h-4 w-4 mr-2" />
                       Invoice
                     </Button>
-                    {order.status === "Delivered" && (
-                      <Button variant="outline" size="sm" className="flex-1">
-                        Review
-                      </Button>
-                    )}
                   </div>
                 </CardContent>
               </Card>

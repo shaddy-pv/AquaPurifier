@@ -4,7 +4,7 @@ export interface NotificationOptions {
   icon?: string;
   badge?: string;
   tag?: string;
-  data?: any;
+  data?: unknown;
 }
 
 export const requestNotificationPermission = async (): Promise<boolean> => {

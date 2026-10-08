@@ -1,8 +1,8 @@
 // Google Analytics 4 Integration
 declare global {
   interface Window {
-    gtag: (...args: any[]) => void;
-    dataLayer: any[];
+    gtag: (...args: unknown[]) => void;
+    dataLayer: unknown[];
   }
 }
 
@@ -20,8 +20,8 @@ export const initGA = () => {
 
   // Initialize dataLayer
   window.dataLayer = window.dataLayer || [];
-  window.gtag = function gtag() {
-    window.dataLayer.push(arguments);
+  window.gtag = function gtag(...args: unknown[]) {
+    window.dataLayer.push(args);
   };
   window.gtag("js", new Date());
   window.gtag("config", GA_TRACKING_ID, {
@@ -139,7 +139,7 @@ export const trackServiceBooking = (serviceName: string) => {
 };
 
 export const trackNewsletterSignup = (email: string) => {
-  trackEvent("newsletter_signup", "conversion", "Newsletter");
+  trackEvent("newsletter_signup", "conversion", email || "Newsletter");
 };
 
 export const trackReviewSubmit = (productId: string, rating: number) => {
@@ -161,7 +161,7 @@ export const trackPerformance = () => {
 };
 
 // Error tracking
-export const trackError = (error: Error, errorInfo?: any) => {
+export const trackError = (error: Error, errorInfo?: Record<string, unknown>) => {
   trackEvent("error", "exception", error.message);
   
   console.error("Error tracked:", error, errorInfo);

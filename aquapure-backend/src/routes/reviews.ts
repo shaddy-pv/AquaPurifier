@@ -229,7 +229,7 @@ router.post('/:id/helpful', authenticate, async (req: AuthRequest, res) => {
 });
 
 // Get all reviews (Admin only)
-router.get('/', authenticate, isAdmin, async (req: AuthRequest, res) => {
+router.get(['/', '/all'], authenticate, isAdmin, async (req: AuthRequest, res) => {
   try {
     const { status, page = '1', limit = '20' } = req.query;
 

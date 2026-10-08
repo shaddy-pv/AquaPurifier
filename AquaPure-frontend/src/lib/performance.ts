@@ -9,6 +9,18 @@ export interface PerformanceMetrics {
   timeToInteractive: number;
 }
 
+export interface WebVitalMetric {
+  name: string;
+  value: number;
+  rating: "good" | "needs-improvement" | "poor";
+}
+
+interface PerformanceMemory {
+  usedJSHeapSize: number;
+  totalJSHeapSize: number;
+  jsHeapSizeLimit: number;
+}
+
 export const getPerformanceMetrics = (): PerformanceMetrics | null => {
   if (typeof window === "undefined" || !window.performance) return null;
 
@@ -37,7 +49,7 @@ export const getPerformanceMetrics = (): PerformanceMetrics | null => {
   // Get LCP
   const lcpEntries = performance.getEntriesByType("largest-contentful-paint");
   if (lcpEntries.length > 0) {
-    const lastEntry = lcpEntries[lcpEntries.length - 1] as any;
+    const lastEntry = lcpEntries[lcpEntries.length - 1];
     metrics.largestContentfulPaint = lastEntry.startTime;
   }
 
@@ -61,27 +73,32 @@ export const logPerformanceMetrics = () => {
 };
 
 // Monitor Core Web Vitals
-export const monitorWebVitals = (callback: (metric: any) => void) => {
+export const monitorWebVitals = (callback: (metric: WebVitalMetric) => void) => {
   // LCP - Largest Contentful Paint
   const lcpObserver = new PerformanceObserver((list) => {
     const entries = list.getEntries();
     const lastEntry = entries[entries.length - 1];
-    callback({
-      name: "LCP",
-      value: lastEntry.startTime,
-      rating: lastEntry.startTime < 2500 ? "good" : lastEntry.startTime < 4000 ? "needs-improvement" : "poor",
-    });
+    if (lastEntry) {
+      callback({
+        name: "LCP",
+        value: lastEntry.startTime,
+        rating: lastEntry.startTime < 2500 ? "good" : lastEntry.startTime < 4000 ? "needs-improvement" : "poor",
+      });
+    }
   });
   lcpObserver.observe({ entryTypes: ["largest-contentful-paint"] });
 
   // FID - First Input Delay
   const fidObserver = new PerformanceObserver((list) => {
     const entries = list.getEntries();
-    entries.forEach((entry: any) => {
+    entries.forEach((entry) => {
+      const timing = entry as PerformanceEntry & { processingStart?: number };
+      const procStart = timing.processingStart ?? timing.startTime;
+      const delay = procStart - timing.startTime;
       callback({
         name: "FID",
-        value: entry.processingStart - entry.startTime,
-        rating: entry.processingStart - entry.startTime < 100 ? "good" : entry.processingStart - entry.startTime < 300 ? "needs-improvement" : "poor",
+        value: delay,
+        rating: delay < 100 ? "good" : delay < 300 ? "needs-improvement" : "poor",
       });
     });
   });
@@ -90,8 +107,8 @@ export const monitorWebVitals = (callback: (metric: any) => void) => {
   // CLS - Cumulative Layout Shift
   let clsValue = 0;
   const clsObserver = new PerformanceObserver((list) => {
-    for (const entry of list.getEntries() as any[]) {
-      if (!entry.hadRecentInput) {
+    for (const entry of list.getEntries() as Array<PerformanceEntry & { hadRecentInput?: boolean; value?: number }>) {
+      if (!entry.hadRecentInput && typeof entry.value === "number") {
         clsValue += entry.value;
       }
     }
@@ -106,9 +123,9 @@ export const monitorWebVitals = (callback: (metric: any) => void) => {
 
 // Resource timing
 export const getResourceTimings = () => {
-  const resources = performance.getEntriesByType("resource");
+  const resources = performance.getEntriesByType("resource") as PerformanceResourceTiming[];
   
-  const timings = resources.map((resource: any) => ({
+  const timings = resources.map((resource) => ({
     name: resource.name,
     duration: resource.duration,
     size: resource.transferSize,
@@ -122,7 +139,7 @@ export const getResourceTimings = () => {
 export const getMemoryUsage = () => {
   if (typeof window === "undefined") return null;
   
-  const memory = (performance as any).memory;
+  const memory = (performance as unknown as { memory?: PerformanceMemory }).memory;
   if (!memory) return null;
 
   return {

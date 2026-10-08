@@ -1,35 +1,82 @@
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
 import dotenv from 'dotenv';
+import path from 'path';
 import { connectDatabase } from './config/database';
+import { noSqlSanitizer } from './middleware/sanitize';
+import { apiLimiter } from './middleware/rateLimiter';
 
 // Import routes
 import authRoutes from './routes/auth';
 import productRoutes from './routes/products';
 import orderRoutes from './routes/orders';
 import reviewRoutes from './routes/reviews';
+import promotionRoutes from './routes/promotions';
+import settingsRoutes from './routes/settings';
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Security Headers (Helmet)
+app.use(helmet({
+  contentSecurityPolicy: false,
+  crossOriginEmbedderPolicy: false
+}));
+
 // Middleware
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  'http://localhost:8080',
+  'http://localhost:8081',
+  'http://localhost:8082',
+  'http://localhost:5173',
+  'http://127.0.0.1:8080',
+  'http://127.0.0.1:8081',
+  'http://127.0.0.1:8082',
+  'http://127.0.0.1:5173'
+].filter(Boolean) as string[];
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV !== 'production') {
+      callback(null, true);
+    } else {
+      callback(new Error('Blocked by CORS policy'));
+    }
+  },
   credentials: true
 }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+
+app.use(express.json({ limit: '15mb' }));
+app.use(express.urlencoded({ extended: true, limit: '15mb' }));
+
+// NoSQL Operator Injection Sanitizer
+app.use(noSqlSanitizer);
+
+// General Rate Limiting for all /api endpoints
+app.use('/api', apiLimiter);
+
+// Static files for uploaded/preset promotional assets with 1-day cache
+app.use('/assets', express.static(path.join(__dirname, '../public/assets'), {
+  maxAge: '1d'
+}));
 
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/reviews', reviewRoutes);
+app.use('/api/promotions', promotionRoutes);
+app.use('/api/settings', settingsRoutes);
+
+// Favicon handler
+app.get('/favicon.ico', (req, res) => res.status(204).end());
 
 // Health check
-app.get('/health', (req, res) => {
+app.get(['/health', '/api/health'], (req, res) => {
   res.json({ 
     status: 'OK', 
     message: 'AquaPure API is running',

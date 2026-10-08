@@ -79,7 +79,7 @@ const FAQ = () => {
         },
         {
           question: "How can I contact customer support?",
-          answer: "Call our toll-free number 1800-123-AQUA, email support@aquapure.com, or use our live chat. We're available 24/7."
+          answer: "Call our helpline +91 9140967681, email support@prayagro.com, or use our WhatsApp chat. We are available 9:00 AM to 9:00 PM every day."
         }
       ]
     },
@@ -206,10 +206,10 @@ const FAQ = () => {
                   Contact Support
                 </a>
                 <a
-                  href="tel:1800123AQUA"
+                  href="tel:+919140967681"
                   className="inline-flex items-center justify-center px-6 py-3 border-2 border-white text-white rounded-lg font-medium hover:bg-white/10 transition-colors"
                 >
-                  Call 1800-123-AQUA
+                  Call +91 9140967681
                 </a>
               </div>
             </CardContent>

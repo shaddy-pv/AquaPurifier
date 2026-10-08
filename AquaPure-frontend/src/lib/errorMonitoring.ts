@@ -7,7 +7,7 @@ export interface ErrorLog {
   url: string;
   userAgent: string;
   userId?: string;
-  additionalInfo?: any;
+  additionalInfo?: Record<string, unknown>;
 }
 
 class ErrorMonitor {
@@ -46,7 +46,7 @@ class ErrorMonitor {
     url?: string;
     line?: number;
     column?: number;
-    additionalInfo?: any;
+    additionalInfo?: Record<string, unknown>;
   }) {
     const errorLog: ErrorLog = {
       message: error.message,
@@ -78,8 +78,6 @@ class ErrorMonitor {
   }
 
   private sendToErrorService(error: ErrorLog) {
-    // In production, send to Sentry, LogRocket, or custom backend
-    // For now, just store locally
     try {
       const storedErrors = localStorage.getItem("error_logs");
       const errors = storedErrors ? JSON.parse(storedErrors) : [];
@@ -127,7 +125,7 @@ class ErrorMonitor {
 export const errorMonitor = new ErrorMonitor();
 
 // Helper functions
-export const logError = (message: string, additionalInfo?: any) => {
+export const logError = (message: string, additionalInfo?: Record<string, unknown>) => {
   errorMonitor.logError({
     message,
     additionalInfo,
