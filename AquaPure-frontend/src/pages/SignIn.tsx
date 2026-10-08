@@ -28,8 +28,8 @@ const SignIn = () => {
       await login(formData.email, formData.password);
       toast.success("Welcome back!");
       navigate("/");
-    } catch (error) {
-      toast.error("Invalid credentials. Please try again.");
+    } catch (error: any) {
+      toast.error(error?.message || "Invalid credentials. Please try again.");
     } finally {
       setIsLoading(false);
     }
