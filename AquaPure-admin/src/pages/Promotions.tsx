@@ -142,7 +142,10 @@ export default function Promotions() {
     active: true
   });
 
-  const storefrontUrl = import.meta.env.VITE_STOREFRONT_URL || "http://localhost:8081";
+  const storefrontUrl = import.meta.env.VITE_STOREFRONT_URL || 
+    (typeof window !== 'undefined' && window.location.hostname !== 'localhost' 
+      ? 'https://prayagro.vercel.app' 
+      : 'http://localhost:8080');
 
   // Load from backend
   const fetchPromotions = async () => {

@@ -34,6 +34,8 @@ const configuredOrigins = (process.env.FRONTEND_URL || '')
 
 const allowedOrigins = [
   ...configuredOrigins,
+  'https://prayagro.vercel.app',
+  'https://admin-prayagro.vercel.app',
   'http://localhost:8080',
   'http://localhost:8081',
   'http://localhost:8082',
