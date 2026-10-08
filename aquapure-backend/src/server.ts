@@ -27,8 +27,13 @@ app.use(helmet({
 }));
 
 // Middleware
+const configuredOrigins = (process.env.FRONTEND_URL || '')
+  .split(',')
+  .map(url => url.trim())
+  .filter(Boolean);
+
 const allowedOrigins = [
-  process.env.FRONTEND_URL,
+  ...configuredOrigins,
   'http://localhost:8080',
   'http://localhost:8081',
   'http://localhost:8082',
@@ -37,14 +42,21 @@ const allowedOrigins = [
   'http://127.0.0.1:8081',
   'http://127.0.0.1:8082',
   'http://127.0.0.1:5173'
-].filter(Boolean) as string[];
+];
 
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV !== 'production') {
+    if (
+      !origin ||
+      allowedOrigins.includes('*') ||
+      allowedOrigins.includes(origin) ||
+      process.env.NODE_ENV !== 'production' ||
+      origin.endsWith('.onrender.com') ||
+      origin.endsWith('.vercel.app')
+    ) {
       callback(null, true);
     } else {
-      callback(new Error('Blocked by CORS policy'));
+      callback(new Error(`Blocked by CORS policy: ${origin}`));
     }
   },
   credentials: true
