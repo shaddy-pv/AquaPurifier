@@ -4,13 +4,13 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Droplets, ShieldCheck, Lock, Mail, ArrowRight, Key } from "lucide-react";
+import { Droplets, ShieldCheck, Lock, Mail, ArrowRight } from "lucide-react";
 import { useAdminAuthStore } from "@/store/adminAuthStore";
 import { toast } from "sonner";
 
 export default function AdminLogin() {
-  const [email, setEmail] = useState("admin@aquapure.com");
-  const [password, setPassword] = useState("Admin@AquaPure2025!");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { login, isAuthenticated } = useAdminAuthStore();
@@ -76,7 +76,7 @@ export default function AdminLogin() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@aquapure.com"
+                  placeholder="admin@prayagro.com"
                   className="pl-10 text-sm border-sky-100 focus:border-primary"
                   required
                 />
@@ -96,16 +96,6 @@ export default function AdminLogin() {
                   required
                 />
               </div>
-            </div>
-
-            {/* Quick Demo Credentials Info */}
-            <div className="p-3 rounded-xl bg-sky-50 border border-sky-100 text-[11px] text-sky-800 space-y-1">
-              <p className="font-semibold flex items-center gap-1.5 text-primary">
-                <Key className="h-3.5 w-3.5" />
-                <span>Default Admin Credentials:</span>
-              </p>
-              <p><span className="text-slate-500">Email:</span> <code className="font-mono font-semibold">admin@aquapure.com</code></p>
-              <p><span className="text-slate-500">Password:</span> <code className="font-mono font-semibold">Admin@AquaPure2025!</code></p>
             </div>
 
             <Button
