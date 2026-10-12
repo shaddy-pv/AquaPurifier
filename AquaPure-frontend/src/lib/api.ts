@@ -371,6 +371,17 @@ export const api = {
       return handleResponse(res);
     },
   },
+
+  // Dynamic Promotions & Marketing Banners
+  promotions: {
+    async get(): Promise<{ success: boolean; promotion: any }> {
+      const res = await fetch(`${API_BASE_URL}/promotions`, {
+        method: 'GET',
+        headers: getHeaders(false),
+      });
+      return handleResponse(res);
+    },
+  },
 };
 
 export interface ApiStoreSettings {

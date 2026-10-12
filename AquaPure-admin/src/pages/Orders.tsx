@@ -20,7 +20,8 @@ import {
   ShoppingCart, 
   RefreshCw,
   Mail,
-  Phone
+  Phone,
+  MessageSquare
 } from "lucide-react";
 import { adminApi, AdminOrder } from "@/lib/api";
 import { toast } from "sonner";
@@ -213,6 +214,21 @@ export default function Orders() {
                               <Eye className="h-3.5 w-3.5 mr-1" />
                               View
                             </Button>
+
+                            {order.shippingAddress?.phone && (
+                              <a
+                                href={`https://wa.me/91${order.shippingAddress.phone.replace(/\D/g, "").slice(-10)}?text=${encodeURIComponent(
+                                  `Namaste ${order.shippingAddress.name}, Aapka PRAYAG RO Order #${order.orderNumber} (₹${order.total}) receive ho gaya hai.`
+                                )}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="h-8 px-2 text-xs text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-md inline-flex items-center gap-1 font-medium transition"
+                                title="WhatsApp Customer"
+                              >
+                                <MessageSquare className="h-3.5 w-3.5 text-emerald-600" />
+                                <span>WhatsApp</span>
+                              </a>
+                            )}
                           </td>
                         </tr>
                       );
@@ -270,11 +286,25 @@ export default function Orders() {
                           variant="outline"
                           size="sm"
                           onClick={() => setSelectedOrder(order)}
-                          className="h-8 text-xs border-sky-100 text-primary hover:bg-sky-50"
+                          className="h-8 text-xs border-sky-100 text-primary hover:bg-sky-50 flex-1"
                         >
                           <Eye className="h-3.5 w-3.5 mr-1" />
                           Details
                         </Button>
+
+                        {order.shippingAddress?.phone && (
+                          <a
+                            href={`https://wa.me/91${order.shippingAddress.phone.replace(/\D/g, "").slice(-10)}?text=${encodeURIComponent(
+                              `Namaste ${order.shippingAddress.name}, Aapka PRAYAG RO Order #${order.orderNumber} (₹${order.total}) receive ho gaya hai.`
+                            )}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="h-8 px-2.5 text-xs text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-md inline-flex items-center justify-center gap-1 font-medium transition"
+                          >
+                            <MessageSquare className="h-3.5 w-3.5 text-emerald-600" />
+                            <span>WhatsApp</span>
+                          </a>
+                        )}
                       </div>
                     </div>
                   );
@@ -363,7 +393,20 @@ export default function Orders() {
                 </div>
               </div>
 
-              <DialogFooter className="pt-4 flex flex-row gap-2 justify-end">
+              <DialogFooter className="pt-4 flex flex-row flex-wrap gap-2 justify-end">
+                {selectedOrder.shippingAddress?.phone && (
+                  <a
+                    href={`https://wa.me/91${selectedOrder.shippingAddress.phone.replace(/\D/g, "").slice(-10)}?text=${encodeURIComponent(
+                      `Namaste ${selectedOrder.shippingAddress.name}, PRAYAG RO Order #${selectedOrder.orderNumber} Status: ${selectedOrder.status.toUpperCase()} (Total: ₹${selectedOrder.total}).`
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs px-3 py-1.5 rounded-lg flex items-center gap-1.5 font-medium transition"
+                  >
+                    <MessageSquare className="h-3.5 w-3.5 text-emerald-600" />
+                    <span>WhatsApp Customer</span>
+                  </a>
+                )}
                 <Button
                   variant="outline"
                   size="sm"

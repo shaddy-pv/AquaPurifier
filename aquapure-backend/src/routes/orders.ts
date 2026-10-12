@@ -3,8 +3,8 @@ import Order from '../models/Order';
 import Product from '../models/Product';
 import Settings from '../models/Settings';
 import { authenticate, isAdmin, optionalAuth, AuthRequest } from '../middleware/auth';
-import { sendOrderConfirmationEmail } from '../services/email';
-import { sendOrderSMS } from '../services/sms';
+import { sendOrderConfirmationEmail, sendAdminOrderEmail } from '../services/email';
+import { sendOrderSMS, sendAdminOrderNotification } from '../services/sms';
 import { createPaymentOrder, verifyPaymentSignature } from '../services/payment';
 import { orderLimiter } from '../middleware/rateLimiter';
 
@@ -126,13 +126,19 @@ router.post('/', orderLimiter, authenticate, async (req: AuthRequest, res) => {
       .populate('user', 'name email phone')
       .populate('items.product', 'name slug images');
 
-    // Send notifications if confirmed (COD)
-    if (order.status === 'confirmed') {
+    // Send notifications if confirmed (COD) or new order
+    if (order.status === 'confirmed' || order.status === 'pending') {
       sendOrderConfirmationEmail(populatedOrder).catch(err => 
         console.error('Email send failed:', err)
       );
+      sendAdminOrderEmail(populatedOrder).catch(err =>
+        console.error('Store owner email alert failed:', err)
+      );
       sendOrderSMS(populatedOrder).catch(err => 
         console.error('SMS send failed:', err)
+      );
+      sendAdminOrderNotification(populatedOrder).catch(err =>
+        console.error('Admin order alert failed:', err)
       );
     }
 
@@ -235,6 +241,9 @@ router.post('/verify-payment', authenticate, async (req: AuthRequest, res) => {
     );
     sendOrderSMS(order).catch(err => 
       console.error('SMS send failed:', err)
+    );
+    sendAdminOrderNotification(order).catch(err =>
+      console.error('Admin order alert failed:', err)
     );
 
     res.json({

@@ -291,6 +291,45 @@ export const adminApi = {
       return handleResponse(res);
     },
   },
+
+  // Media / Cloudinary Upload
+  upload: {
+    async uploadImage(file: File, folder = 'aquapure/products'): Promise<{ success: boolean; url: string; public_id: string; message?: string }> {
+      const formData = new FormData();
+      formData.append('image', file);
+      formData.append('folder', folder);
+
+      const token = localStorage.getItem('aquapure_admin_token');
+      const headers: Record<string, string> = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const res = await fetch(`${API_BASE_URL}/upload/image`, {
+        method: 'POST',
+        headers,
+        body: formData,
+      });
+      return handleResponse(res);
+    },
+
+    async uploadBase64(base64Data: string, folder = 'aquapure/products'): Promise<{ success: boolean; url: string; public_id: string }> {
+      const res = await fetch(`${API_BASE_URL}/upload/base64`, {
+        method: 'POST',
+        headers: getHeaders(true),
+        body: JSON.stringify({ data: base64Data, folder }),
+      });
+      return handleResponse(res);
+    },
+
+    async getStatus(): Promise<{ configured: boolean; cloudName?: string }> {
+      const res = await fetch(`${API_BASE_URL}/upload/status`, {
+        method: 'GET',
+        headers: getHeaders(true),
+      });
+      return handleResponse(res);
+    },
+  },
 };
 
 export interface AdminStoreSettings {

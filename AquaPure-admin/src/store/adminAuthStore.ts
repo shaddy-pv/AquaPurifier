@@ -27,16 +27,23 @@ export const useAdminAuthStore = create<AdminAuthState>((set) => ({
   isLoading: !!initialToken,
 
   login: async (email: string, password: string) => {
-    const data = await adminApi.auth.login(email, password);
+    const cleanEmail = email.trim().toLowerCase();
+    const data = await adminApi.auth.login(cleanEmail, password);
     if (data.user.role !== "admin") {
       throw new Error("Access restricted: This account does not possess administrator privileges.");
     }
     localStorage.setItem("aquapure_admin_token", data.token);
+    try {
+      localStorage.setItem("aquapure_admin_user", JSON.stringify(data.user));
+    } catch {
+      // Ignore
+    }
     set({ admin: data.user, isAuthenticated: true, isLoading: false });
   },
 
   logout: () => {
     localStorage.removeItem("aquapure_admin_token");
+    localStorage.removeItem("aquapure_admin_user");
     set({ admin: null, isAuthenticated: false, isLoading: false });
   },
 
@@ -48,22 +55,51 @@ export const useAdminAuthStore = create<AdminAuthState>((set) => ({
     }
 
     try {
-      // 5-second timeout so it never hangs indefinitely
+      // 15-second timeout to accommodate Render / backend spin-up cold starts
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000);
+      const timeoutId = setTimeout(() => controller.abort(), 15000);
 
       const user = await adminApi.auth.getMe(controller.signal);
       clearTimeout(timeoutId);
 
       if (user && user.role === "admin") {
+        try {
+          localStorage.setItem("aquapure_admin_user", JSON.stringify(user));
+        } catch {
+          // Ignore
+        }
         set({ admin: user, isAuthenticated: true, isLoading: false });
       } else {
+        // Explicit non-admin or invalid user
         localStorage.removeItem("aquapure_admin_token");
+        localStorage.removeItem("aquapure_admin_user");
         set({ admin: null, isAuthenticated: false, isLoading: false });
       }
-    } catch {
-      localStorage.removeItem("aquapure_admin_token");
-      set({ admin: null, isAuthenticated: false, isLoading: false });
+    } catch (err: any) {
+      const isAuthError = err?.message?.includes("401") || 
+                          err?.message?.includes("Unauthorized") || 
+                          err?.message?.includes("jwt expired") || 
+                          err?.message?.includes("invalid token");
+
+      if (isAuthError) {
+        localStorage.removeItem("aquapure_admin_token");
+        localStorage.removeItem("aquapure_admin_user");
+        set({ admin: null, isAuthenticated: false, isLoading: false });
+      } else {
+        // Network lag, cold start or offline: Keep session alive with cached admin user if available
+        let cachedAdmin: AdminUser | null = null;
+        try {
+          const raw = localStorage.getItem("aquapure_admin_user");
+          if (raw) cachedAdmin = JSON.parse(raw);
+        } catch {
+          // Ignore
+        }
+        set({ 
+          admin: cachedAdmin, 
+          isAuthenticated: !!cachedAdmin, 
+          isLoading: false 
+        });
+      }
     }
   },
 }));

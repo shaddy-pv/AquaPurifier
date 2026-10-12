@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { api } from "@/lib/api";
 
 export interface PromotionState {
   announcementBar: {
@@ -147,11 +148,6 @@ const DEFAULT_PROMOTIONS = {
   ]
 };
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 
-  (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1' 
-    ? 'https://aquapurifier.onrender.com/api' 
-    : 'http://localhost:5001/api');
-
 export const usePromotionStore = create<PromotionState>()(
   persist(
     (set) => ({
@@ -161,21 +157,18 @@ export const usePromotionStore = create<PromotionState>()(
       fetchPromotions: async () => {
         set({ isLoading: true });
         try {
-          const res = await fetch(`${API_BASE_URL}/promotions`);
-          if (res.ok) {
-            const data = await res.json();
-            if (data?.promotion) {
-              set({
-                announcementBar: data.promotion.announcementBar || DEFAULT_PROMOTIONS.announcementBar,
-                heroBanner: data.promotion.heroBanner || DEFAULT_PROMOTIONS.heroBanner,
-                flashSale: data.promotion.flashSale || DEFAULT_PROMOTIONS.flashSale,
-                waterTestCampaign: data.promotion.waterTestCampaign || DEFAULT_PROMOTIONS.waterTestCampaign,
-                catalogBanner: data.promotion.catalogBanner || DEFAULT_PROMOTIONS.catalogBanner,
-                coupons: data.promotion.coupons || DEFAULT_PROMOTIONS.coupons,
-                isLoading: false
-              });
-              return;
-            }
+          const data = await api.promotions.get();
+          if (data?.promotion) {
+            set({
+              announcementBar: data.promotion.announcementBar || DEFAULT_PROMOTIONS.announcementBar,
+              heroBanner: data.promotion.heroBanner || DEFAULT_PROMOTIONS.heroBanner,
+              flashSale: data.promotion.flashSale || DEFAULT_PROMOTIONS.flashSale,
+              waterTestCampaign: data.promotion.waterTestCampaign || DEFAULT_PROMOTIONS.waterTestCampaign,
+              catalogBanner: data.promotion.catalogBanner || DEFAULT_PROMOTIONS.catalogBanner,
+              coupons: data.promotion.coupons || DEFAULT_PROMOTIONS.coupons,
+              isLoading: false
+            });
+            return;
           }
         } catch (err) {
           console.warn("Could not fetch promotions from API, keeping current state:", err);

@@ -34,7 +34,8 @@ router.post('/register', authLimiter, async (req, res) => {
     }
 
     // Check if user already exists
-    const existingUser = await User.findOne({ email: email.toLowerCase() });
+    const normalizedEmail = email.trim().toLowerCase();
+    const existingUser = await User.findOne({ email: normalizedEmail });
     if (existingUser) {
       return res.status(400).json({ 
         message: 'Email already registered. Please login instead.' 
@@ -43,8 +44,8 @@ router.post('/register', authLimiter, async (req, res) => {
 
     // Create new user
     const user = await User.create({
-      name,
-      email: email.toLowerCase(),
+      name: name.trim(),
+      email: normalizedEmail,
       password,
       phone
     });
@@ -100,8 +101,9 @@ router.post('/login', authLimiter, async (req, res) => {
       });
     }
 
-    // Find user
-    const user = await User.findOne({ email: email.toLowerCase() });
+    // Find user (case-insensitive and trimmed)
+    const normalizedEmail = email.trim().toLowerCase();
+    const user = await User.findOne({ email: normalizedEmail });
     if (!user) {
       return res.status(401).json({ 
         message: 'Invalid email or password' 
@@ -266,7 +268,8 @@ router.post('/forgot-password', async (req, res) => {
       return res.status(400).json({ message: 'Email is required' });
     }
 
-    const user = await User.findOne({ email: email.toLowerCase() });
+    const normalizedEmail = email.trim().toLowerCase();
+    const user = await User.findOne({ email: normalizedEmail });
     if (!user) {
       // Don't disclose whether email exists
       return res.json({ 
@@ -354,6 +357,24 @@ router.patch('/users/:id/role', authenticate, isAdmin, async (req: AuthRequest, 
     if (!['customer', 'admin'].includes(role)) {
       return res.status(400).json({ message: 'Invalid role. Must be customer or admin.' });
     }
+
+    // Safety guard 1: Admin cannot demote their own active account
+    if (req.user?.id === req.params.id && role !== 'admin') {
+      return res.status(400).json({
+        message: 'Safety protection: You cannot demote your own administrator account.'
+      });
+    }
+
+    // Safety guard 2: Cannot demote the last remaining administrator
+    if (role !== 'admin') {
+      const adminCount = await User.countDocuments({ role: 'admin' });
+      if (adminCount <= 1) {
+        return res.status(400).json({
+          message: 'Safety protection: Cannot demote the last remaining system administrator.'
+        });
+      }
+    }
+
     const user = await User.findByIdAndUpdate(req.params.id, { role }, { new: true }).select('-password');
     if (!user) {
       return res.status(404).json({ message: 'User not found' });

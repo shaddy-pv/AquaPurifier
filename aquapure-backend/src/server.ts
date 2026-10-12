@@ -14,6 +14,8 @@ import orderRoutes from './routes/orders';
 import reviewRoutes from './routes/reviews';
 import promotionRoutes from './routes/promotions';
 import settingsRoutes from './routes/settings';
+import uploadRoutes from './routes/upload';
+import { isCloudinaryConfigured } from './config/cloudinary';
 
 dotenv.config();
 
@@ -58,10 +60,11 @@ app.use(cors({
     ) {
       callback(null, true);
     } else {
-      callback(new Error(`Blocked by CORS policy: ${origin}`));
+      callback(null, false);
     }
   },
-  credentials: true
+  credentials: true,
+  maxAge: 86400 // Cache preflight OPTIONS requests for 24 hours
 }));
 
 app.use(express.json({ limit: '15mb' }));
@@ -85,6 +88,7 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/promotions', promotionRoutes);
 app.use('/api/settings', settingsRoutes);
+app.use('/api/upload', uploadRoutes);
 
 // Favicon handler
 app.get('/favicon.ico', (req, res) => res.status(204).end());
@@ -119,6 +123,7 @@ const startServer = async () => {
     app.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
       console.log(`📍 Health check: http://localhost:${PORT}/health`);
+      console.log(`☁️ Cloudinary Storage: ${isCloudinaryConfigured() ? 'Configured & Ready ✅' : 'Not configured ⚠️'}`);
     });
   } catch (error) {
     console.error('Failed to start server:', error);

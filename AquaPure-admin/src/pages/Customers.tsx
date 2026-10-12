@@ -15,9 +15,11 @@ import {
   UserCog
 } from "lucide-react";
 import { adminApi, AdminUser } from "@/lib/api";
+import { useAdminAuthStore } from "@/store/adminAuthStore";
 import { toast } from "sonner";
 
 export default function Customers() {
+  const { admin: currentAdmin } = useAdminAuthStore();
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -40,14 +42,27 @@ export default function Customers() {
     fetchUsers();
   }, [fetchUsers]);
 
-  const handleRoleToggle = async (userId: string, currentRole: "customer" | "admin") => {
-    const nextRole = currentRole === "admin" ? "customer" : "admin";
-    setUpdatingId(userId);
+  const handleRoleToggle = async (user: AdminUser) => {
+    const nextRole = user.role === "admin" ? "customer" : "admin";
+
+    // Guard: Prevent demoting self
+    if (user.role === "admin" && (user.id === currentAdmin?.id || user.email === currentAdmin?.email)) {
+      toast.error("Safety Protection: You cannot demote your own administrator account.");
+      return;
+    }
+
+    // Confirmation prompt
+    const actionLabel = nextRole === "admin" ? "promote to Administrator" : "demote to regular Customer";
+    if (!window.confirm(`Are you sure you want to ${actionLabel} account: "${user.name}" (${user.email})?`)) {
+      return;
+    }
+
+    setUpdatingId(user.id);
     try {
-      await adminApi.users.updateRole(userId, nextRole);
-      toast.success(`User role updated to ${nextRole}`);
+      await adminApi.users.updateRole(user.id, nextRole);
+      toast.success(`User "${user.name}" role updated to ${nextRole}`);
       setUsers((prev) => 
-        prev.map((u) => (u.id === userId ? { ...u, role: nextRole } : u))
+        prev.map((u) => (u.id === user.id ? { ...u, role: nextRole } : u))
       );
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Failed to update role";
@@ -202,7 +217,7 @@ export default function Customers() {
                             variant="ghost"
                             size="sm"
                             disabled={updatingId === u.id}
-                            onClick={() => handleRoleToggle(u.id, u.role)}
+                            onClick={() => handleRoleToggle(u)}
                             className="text-xs text-slate-600 hover:text-primary hover:bg-sky-50"
                           >
                             <UserCog className="h-3.5 w-3.5 mr-1.5" />
@@ -252,7 +267,7 @@ export default function Customers() {
                         variant="outline"
                         size="sm"
                         disabled={updatingId === u.id}
-                        onClick={() => handleRoleToggle(u.id, u.role)}
+                        onClick={() => handleRoleToggle(u)}
                         className="w-full text-xs border-sky-100 text-slate-700 hover:text-primary hover:bg-sky-50"
                       >
                         <UserCog className="h-3.5 w-3.5 mr-1.5" />

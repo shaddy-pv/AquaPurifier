@@ -126,8 +126,10 @@ Water-themed design with blues, whites, and refreshing gradients.
     @apply border-border;
   }
 
-  body {
+  html, body {
     @apply bg-background text-foreground font-sans;
+    overflow-x: hidden;
+    max-width: 100vw;
   }
 
   /* Floating Water Elements Background */

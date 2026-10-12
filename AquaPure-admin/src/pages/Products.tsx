@@ -21,7 +21,11 @@ import {
   Trash2, 
   Search, 
   RefreshCw,
-  Droplets
+  Droplets,
+  UploadCloud,
+  Loader2,
+  X,
+  Image as ImageIcon
 } from "lucide-react";
 import { adminApi, AdminProduct } from "@/lib/api";
 import { toast } from "sonner";
@@ -47,6 +51,39 @@ export default function Products() {
     features: "",
     images: "/placeholder.svg"
   });
+
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const handleImageFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select a valid image file (JPEG, PNG, WebP)");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image file size must be under 5MB");
+      return;
+    }
+
+    setUploadingImage(true);
+    try {
+      const res = await adminApi.upload.uploadImage(file);
+      if (res.url) {
+        setFormData((prev) => ({ ...prev, images: res.url }));
+        toast.success("Image uploaded to Cloudinary successfully!");
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Image upload failed";
+      toast.error(msg);
+    } finally {
+      setUploadingImage(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
 
   const fetchProducts = useCallback(async () => {
     setLoading(true);
@@ -453,14 +490,74 @@ export default function Products() {
               </div>
             </div>
 
-            <div className="space-y-1.5">
-              <Label className="text-slate-700 font-semibold">Image Asset URL</Label>
-              <Input
-                value={formData.images}
-                onChange={(e) => setFormData({ ...formData, images: e.target.value })}
-                placeholder="/placeholder.svg or https://images..."
-                className="text-sm border-sky-100"
-              />
+            <div className="space-y-2 p-3 bg-sky-50/50 rounded-xl border border-sky-100">
+              <div className="flex items-center justify-between">
+                <Label className="text-slate-800 font-semibold flex items-center gap-1.5">
+                  <ImageIcon className="h-4 w-4 text-primary" />
+                  <span>Product Photograph / Image</span>
+                </Label>
+                <span className="text-[10px] uppercase font-bold text-sky-600 bg-sky-100/70 px-2 py-0.5 rounded-full">
+                  Cloudinary CDN
+                </span>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center pt-1">
+                {formData.images && (
+                  <div className="relative h-20 w-20 rounded-xl overflow-hidden border border-sky-200 bg-white shadow-soft flex-shrink-0">
+                    <img
+                      src={formData.images}
+                      alt="Product preview"
+                      className="h-full w-full object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = "/placeholder.svg";
+                      }}
+                    />
+                    <button
+                      type="button"
+                      title="Clear image"
+                      onClick={() => setFormData({ ...formData, images: "" })}
+                      className="absolute top-1 right-1 bg-black/60 hover:bg-black/80 text-white rounded-full p-0.5 transition"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                )}
+
+                <div className="flex-1 w-full space-y-2">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageFileUpload}
+                    className="hidden"
+                  />
+                  <div className="flex items-center gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      disabled={uploadingImage}
+                      onClick={() => fileInputRef.current?.click()}
+                      className="border-sky-200 bg-white text-sky-700 hover:bg-sky-50 text-xs flex items-center gap-1.5 shadow-sm"
+                    >
+                      {uploadingImage ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <UploadCloud className="h-3.5 w-3.5 text-primary" />
+                      )}
+                      <span>{uploadingImage ? "Uploading to Cloudinary..." : "Choose Image File"}</span>
+                    </Button>
+                    <span className="text-[11px] text-slate-400">or enter direct URL below:</span>
+                  </div>
+
+                  <Input
+                    value={formData.images}
+                    onChange={(e) => setFormData({ ...formData, images: e.target.value })}
+                    placeholder="https://res.cloudinary.com/... or /placeholder.svg"
+                    className="text-xs border-sky-100 bg-white"
+                  />
+                </div>
+              </div>
             </div>
 
             <div className="space-y-1.5">

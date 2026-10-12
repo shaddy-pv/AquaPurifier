@@ -9,17 +9,17 @@ export const AdminProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ c
   useEffect(() => {
     checkAuth();
 
-    // If loading takes longer than 2.5 seconds, show fallback button
+    // If loading takes longer than 5 seconds, show friendly fallback indicator
     const fallbackTimer = setTimeout(() => {
       setShowFallback(true);
-    }, 2500);
+    }, 5000);
 
-    // Hard timeout after 4 seconds: force isLoading to false so user is never stuck
+    // Hard timeout after 15 seconds: force isLoading to false if server doesn't respond
     const hardTimeout = setTimeout(() => {
       if (useAdminAuthStore.getState().isLoading) {
         useAdminAuthStore.setState({ isLoading: false });
       }
-    }, 4000);
+    }, 15000);
 
     return () => {
       clearTimeout(fallbackTimer);

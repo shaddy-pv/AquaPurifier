@@ -1,23 +1,50 @@
 import nodemailer from 'nodemailer';
 
-// Create transporter
+// Create transporter (Supports Gmail SMTP and SendGrid)
 const createTransporter = () => {
-  const apiKey = process.env.SENDGRID_API_KEY;
-  
-  if (!apiKey) {
-    console.warn('⚠️  SENDGRID_API_KEY not configured. Email sending will be skipped.');
-    return null;
+  // 1. SMTP / Gmail Configuration
+  if (process.env.SMTP_USER && process.env.SMTP_PASS) {
+    const isGmail =
+      (process.env.SMTP_HOST || '').includes('gmail') ||
+      (process.env.SMTP_USER || '').endsWith('@gmail.com');
+
+    if (isGmail) {
+      return nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS
+        }
+      });
+    }
+
+    return nodemailer.createTransport({
+      host: process.env.SMTP_HOST || 'smtp.gmail.com',
+      port: Number(process.env.SMTP_PORT) || 587,
+      secure: process.env.SMTP_SECURE === 'true' || Number(process.env.SMTP_PORT) === 465,
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS
+      }
+    } as any);
   }
 
-  return nodemailer.createTransport({
-    host: 'smtp.sendgrid.net',
-    port: 587,
-    secure: false,
-    auth: {
-      user: 'apikey',
-      pass: apiKey
-    }
-  } as any);
+  // 2. SendGrid API Key Fallback
+  const apiKey = process.env.SENDGRID_API_KEY;
+  if (apiKey && !apiKey.includes('XXXXXXXX')) {
+    return nodemailer.createTransport({
+      host: 'smtp.sendgrid.net',
+      port: 587,
+      secure: false,
+      auth: {
+        user: 'apikey',
+        pass: apiKey
+      }
+    } as any);
+  }
+
+  console.warn('⚠️ Neither SMTP nor SendGrid credentials configured. Email dispatch will be simulated in console.');
+  return null;
 };
 
 // Send order confirmation email
@@ -230,3 +257,99 @@ export const sendOrderStatusEmail = async (order: any, newStatus: string) => {
     console.error('❌ Email send failed:', error);
   }
 };
+
+// Send new order alert email to Admin / Store Owner
+export const sendAdminOrderEmail = async (order: any) => {
+  try {
+    const transporter = createTransporter();
+    if (!transporter) return;
+
+    const fromEmail = process.env.FROM_EMAIL || 'roprayaag@gmail.com';
+    const ownerEmail = process.env.SMTP_USER || 'roprayaag@gmail.com';
+
+    const customerName = order.shippingAddress?.name || order.user?.name || 'Customer';
+    const customerPhone = order.shippingAddress?.phone || order.user?.phone || 'N/A';
+    const customerCity = order.shippingAddress?.city || 'N/A';
+    const street = order.shippingAddress?.street || '';
+    const pincode = order.shippingAddress?.pincode || '';
+    const paymentMode = (order.paymentMethod || 'COD').toUpperCase();
+
+    const itemsRows = (order.items || [])
+      .map((item: any) => `
+        <tr>
+          <td style="padding: 10px; border-bottom: 1px solid #eee;"><strong>${item.name}</strong></td>
+          <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;">${item.quantity}</td>
+          <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">₹${item.price}</td>
+        </tr>
+      `)
+      .join('');
+
+    await transporter.sendMail({
+      from: `"AquaPure Store" <${fromEmail}>`,
+      to: ownerEmail,
+      subject: `🚨 [NAYA ORDER] Order #${order.orderNumber} - ₹${order.total} (${customerName})`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: #0284c7; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
+            .card { background: #ffffff; padding: 20px; border: 1px solid #e2e8f0; border-radius: 0 0 8px 8px; }
+            .badge { display: inline-block; background: #22c55e; color: white; padding: 4px 12px; border-radius: 12px; font-weight: bold; font-size: 13px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+            .total { font-size: 20px; font-weight: bold; color: #0284c7; text-align: right; margin-top: 15px; }
+            .btn { display: inline-block; background: #0284c7; color: #ffffff !important; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; margin-top: 20px; }
+          </style>
+        </head>
+        <body style="background-color: #f8fafc; padding: 20px 0;">
+          <div class="container">
+            <div class="header">
+              <h2 style="margin: 0;">🚨 Naya Order Received!</h2>
+              <p style="margin: 5px 0 0; opacity: 0.9;">Order #${order.orderNumber}</p>
+            </div>
+            <div class="card">
+              <p><span class="badge">${paymentMode}</span> &nbsp; <strong>Total Amount: ₹${order.total}</strong></p>
+              
+              <h3 style="border-bottom: 2px solid #f1f5f9; padding-bottom: 8px;">Customer Details</h3>
+              <p>
+                <strong>Naam:</strong> ${customerName}<br>
+                <strong>Phone / Mobile:</strong> <a href="tel:${customerPhone}">${customerPhone}</a><br>
+                <strong>Address:</strong> ${street}, ${customerCity} - ${pincode}
+              </p>
+
+              <h3 style="border-bottom: 2px solid #f1f5f9; padding-bottom: 8px;">Ordered Items</h3>
+              <table>
+                <thead>
+                  <tr style="background: #f8fafc; text-align: left;">
+                    <th style="padding: 10px;">Item</th>
+                    <th style="padding: 10px; text-align: center;">Qty</th>
+                    <th style="padding: 10px; text-align: right;">Price</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${itemsRows}
+                </tbody>
+              </table>
+
+              <div class="total">
+                Total Payable: ₹${order.total}
+              </div>
+
+              <div style="text-align: center; margin-top: 25px;">
+                <a href="${process.env.ADMIN_URL || 'http://localhost:8082'}/orders" class="btn">Admin Panel Me Order Dekhein</a>
+              </div>
+            </div>
+          </div>
+        </body>
+        </html>
+      `
+    });
+
+    console.log('✅ Store owner order alert email delivered to:', ownerEmail);
+  } catch (error: any) {
+    console.error('❌ Store owner alert email failed:', error.message);
+  }
+};
+
