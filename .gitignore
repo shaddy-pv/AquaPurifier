@@ -43,3 +43,9 @@ pnpm-debug.log*
 test-db.js
 **/test-db.js
 *.timestamp-*.mjs
+
+# Private Account Credentials & Infrastructure
+*PRIVATE*
+*private*
+ACCOUNTS_PRIVATE.md
+
